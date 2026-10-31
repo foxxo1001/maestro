@@ -397,6 +397,10 @@ export interface GlobalSettings {
    *  runs only). Managed from Settings → MCP. Absent on installs predating
    *  MCP support. */
   mcpServers?: McpServerConfig[];
+  /** Hand-added models per harness (Settings → Harnesses), appended to the
+   *  live/built-in catalogs — the escape hatch for brand-new models no CLI
+   *  catalog lists yet. */
+  customModels?: Partial<Record<HarnessId, ModelOption[]>>;
   /** User's orchestrator + specialist stack. Per-role, per-field overrides of
    *  DEFAULT_ROLES (harness/model/effort/instructions/label/blurb), keyed by role
    *  id; also holds the full definition of each user-created role. Global across

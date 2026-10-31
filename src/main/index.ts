@@ -10,7 +10,7 @@ import { appIconPath } from './icon';
 import { registerIpc } from './ipc';
 import { detectHarnesses, stopAllAgents } from './services/harness';
 import { memorySummary } from './services/memguard';
-import { refreshCodexCatalog } from './services/harness/codex-models';
+import { refreshCodexCatalog, refreshLiveModels } from './services/harness/codex-models';
 import { catchUpAll, reconnectCatchUp, stopAllFollowers } from './services/cloud';
 import { bootDrainLocalQueues } from './services/chat';
 import * as account from './services/account';
@@ -620,6 +620,9 @@ if (!gotLock && !isSmoke) {
     step('refreshCodexCatalog', () =>
       void detectHarnesses().then((infos) => {
         if (infos.find((h) => h.id === 'codex')?.installed) void refreshCodexCatalog();
+        // Live catalogs for the other harnesses (claude / kimi / grok / cursor);
+        // per-CLI probes no-op silently when a CLI isn't installed, throttled.
+        void refreshLiveModels();
       })
     );
     // One-time: backfill provisional titles for chats that predate first-message

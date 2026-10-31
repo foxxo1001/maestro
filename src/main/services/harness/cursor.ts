@@ -13,6 +13,7 @@ export const cursorAdapter: HarnessAdapter = {
   build(opts: BuildOpts) {
     const args = ['-p', '--output-format', 'stream-json', '--force'];
     if (opts.sessionId) args.push('--resume', opts.sessionId);
+    if (opts.model) args.push('--model', opts.model);
     args.push(promptWithSystem(opts));
     return { cmd: 'cursor-agent', args, stdin: null };
   },

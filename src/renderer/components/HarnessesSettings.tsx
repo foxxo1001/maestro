@@ -7,7 +7,7 @@ import { useApp } from '../store/app';
 import { ApiKeyField, Segmented, Spinner, Toggle } from './common';
 import AuthFix from './AuthFix';
 import PtyView from './TerminalPanel';
-import type { HarnessAuth, HarnessId, HarnessLoginView, HarnessLogins, SubUsage } from '../../shared/types';
+import type { HarnessAuth, HarnessId, HarnessLoginView, HarnessLogins, ModelOption, SubUsage } from '../../shared/types';
 
 /** Settings layout (shared with SettingsModal, which imports this file): a
  *  titled group of aligned two-column rows on one quiet card — Lovable-style.
@@ -416,7 +416,55 @@ function HarnessAuthPanel({ harness }: { harness: HarnessId }) {
           </div>
         </SettingsSection>
       )}
+
+      {auth.installed && (
+        <SettingsSection>
+          <SettingsRow
+            stack
+            label="Custom models"
+            description={`Appended to ${auth.displayName}'s model list — for brand-new models no catalog lists yet. One per line: "model-id | Display label" (label optional).`}
+          >
+            <CustomModelsArea harness={harness} />
+          </SettingsRow>
+        </SettingsSection>
+      )}
     </div>
+  );
+}
+
+/** One textarea per harness for hand-added models; saved on blur, and the main
+ *  process re-broadcasts harness:models:updated on that settings write, so
+ *  open pickers pick the new entries up immediately. */
+function CustomModelsArea({ harness }: { harness: HarnessId }) {
+  const settings = useApp((s) => s.settings);
+  const [draft, setDraft] = useState<string | null>(null);
+  const saved = settings.customModels?.[harness] ?? [];
+  const text = draft ?? saved.map((m) => (m.label && m.label !== m.id ? `${m.id} | ${m.label}` : m.id)).join('\n');
+  const save = async () => {
+    if (draft === null) return;
+    const list = draft
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .map((l) => {
+        const [id, ...rest] = l.split('|').map((s) => s.trim());
+        return { id, ...(rest.length ? { label: rest.join('|').trim() } : {}) } as ModelOption;
+      })
+      .filter((m) => /^[a-zA-Z0-9._/:+-]+$/.test(m.id));
+    const next = { ...(settings.customModels ?? {}) };
+    if (list.length) next[harness] = list;
+    else delete next[harness];
+    await useApp.getState().saveSettings({ customModels: next });
+    setDraft(null);
+  };
+  return (
+    <textarea
+      className="input h-24 resize-y font-mono"
+      value={text}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => void save()}
+      placeholder={'claude-opus-5-6 | Opus 5.6'}
+    />
   );
 }
 

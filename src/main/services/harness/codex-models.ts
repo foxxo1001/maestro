@@ -10,6 +10,8 @@ import {
   type ModelOption,
 } from '../../../shared/types';
 import { grokModels } from './grok-models';
+import { claudeLiveModels, cursorLiveModels, grokLiveModels, kimiLiveModels, refreshLiveProbes } from './live-models';
+import { Settings } from '../../db';
 import { localHost } from '../../hosts/local';
 import { broadcast } from '../../bus';
 
@@ -155,9 +157,52 @@ export function codexReasoningEffort(model: string, effort: string): string {
   return prefer.find((id) => supported.includes(id)) ?? supported[supported.length - 1] ?? 'high';
 }
 
-/** The effective per-harness model map: the static lists, with Codex resolved
- *  live. This is the source of truth for both the renderer picker (via IPC) and
- *  main-side model validation, so the two never disagree about which models exist. */
+/** The effective per-harness model map: the built-in lists with the live
+ *  catalogs resolved in (Codex from its cache, Claude via the API, Kimi/Grok
+ *  via their CLIs, Cursor best-effort) and hand-added models appended. This is
+ *  the source of truth for both the renderer picker (via IPC) and main-side
+ *  model validation, so the two never disagree about which models exist. */
 export function effectiveHarnessModels(): Record<HarnessId, ModelOption[]> {
-  return { ...(HARNESS_MODELS as Record<HarnessId, ModelOption[]>), codex: codexModels(), grok: grokModels() };
+  return withCustomModels({
+    ...(HARNESS_MODELS as Record<HarnessId, ModelOption[]>),
+    'claude-code': claudeLiveModels(),
+    codex: codexModels(),
+    'kimi-code': kimiLiveModels(),
+    grok: grokLiveModels(),
+    cursor: cursorLiveModels(),
+  });
+}
+
+/** Hand-added models (Settings → Harnesses), appended after the live/built-in
+ *  lists — the escape hatch for a brand-new model no catalog knows yet.
+ *  Deduped by id; unknown harnesses and malformed rows are skipped. */
+function withCustomModels(map: Record<HarnessId, ModelOption[]>): Record<HarnessId, ModelOption[]> {
+  const custom = Settings.global().customModels;
+  if (!custom) return map;
+  for (const [harness, list] of Object.entries(custom) as [HarnessId, ModelOption[]][]) {
+    if (!map[harness] || !Array.isArray(list)) continue;
+    const seen = new Set(map[harness].map((m) => m.id));
+    for (const m of list) {
+      if (m?.id && typeof m.id === 'string' && !seen.has(m.id)) {
+        map[harness] = [...map[harness], { ...m, label: m.label || m.id }];
+        seen.add(m.id);
+      }
+    }
+  }
+  return map;
+}
+
+let lastLiveRefresh = 0;
+
+/** Re-probe every live catalog (hourly throttle unless forced) and, when any
+ *  list changed, push the fresh map so open pickers re-render. */
+export async function refreshLiveModels(force = false): Promise<boolean> {
+  const now = Date.now();
+  if (!force && now - lastLiveRefresh < REFRESH_THROTTLE_MS) return false;
+  lastLiveRefresh = now;
+  const before = JSON.stringify(effectiveHarnessModels());
+  await refreshLiveProbes();
+  if (JSON.stringify(effectiveHarnessModels()) === before) return false;
+  broadcast('harness:models:updated', effectiveHarnessModels());
+  return true;
 }

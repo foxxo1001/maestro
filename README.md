@@ -311,6 +311,22 @@ structured blocks, so history renders identically after a restore. The UI shares
 - 云端 / SSH 工作区暂不注入（配置文件只在本机有意义）。
 - 相关代码：`src/shared/types.ts`（`McpServerConfig`）、`src/main/services/mcp.ts`、`src/main/services/harness/{claude,codex}.ts`、`src/main/services/harness/index.ts`（resolveTurn 接线）、`src/renderer/components/McpSettings.tsx`。
 
+### 新增：模型目录实时化（不再等上游发版）
+
+模型选择器不再依赖硬编码的 `HARNESS_MODELS` 静态表，各 harness 走自己的活目录：
+
+- **claude-code**：Anthropic `/v1/models`（复用 CLI 的 OAuth 登录态），结果缓存到
+  `<userData>/claude-models-cache.json`，启动即时可见、之后每小时静默刷新。
+- **codex**：上游原有的 `~/.codex/models_cache.json` + `codex debug models` 机制（未改动）。
+- **kimi-code**：`kimi provider list --json`（含显示名 / 上下文窗口 / effort 阶梯）。
+- **grok**：`grok models`（登录态可用列表）+ `~/.grok/config.toml` 自定义节。
+- **cursor**：`cursor-agent models list` 防御式解析（解析失败回退 Default）；
+  另修复了适配器不透传 `--model` 的问题（此前选了模型也会被忽略）。
+- **自定义模型**（所有 harness 的兜底）：Settings → Harnesses 每个面板底部
+  「Custom models」，每行 `模型id | 显示名`，保存即广播、选择器立刻生效。
+  相关代码：`src/main/services/harness/live-models.ts`、`codex-models.ts`
+  （`effectiveHarnessModels` / `refreshLiveModels`）。
+
 ### 变更：自动更新默认停用
 
 - fork 不检查上游更新源（避免被"更新"回上游版本）。需要时设 `MAESTRO_FORK_UPDATER=1` 重新打开。

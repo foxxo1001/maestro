@@ -2,7 +2,7 @@ import fs from 'fs';
 import nodePath from 'path';
 import { app, clipboard, dialog, ipcMain, shell } from 'electron';
 import { run } from './exec';
-import { getWindow, rebuildMenu } from './bus';
+import { broadcast, getWindow, rebuildMenu } from './bus';
 import { Comments, Hosts, Messages, Projects, Scheduled, Settings, Subagents, Todos, Workspaces, mustWorkspace, mustProject, now, uid } from './db';
 import * as git from './services/git';
 import * as files from './services/files';
@@ -36,7 +36,7 @@ import {
   setActiveLogin,
 } from './services/harness/logins';
 import { readOAuthCreds } from './services/harness/claude';
-import { effectiveHarnessModels, refreshCodexCatalog } from './services/harness/codex-models';
+import { effectiveHarnessModels, refreshCodexCatalog, refreshLiveModels } from './services/harness/codex-models';
 import { clearFinishedTasks, workspaceBackgroundTasks } from './services/harness/tasks';
 import { installRemoteHarness, probeRemoteHarness } from './services/harness/remote';
 import { createPr, mergePr, refreshPr } from './services/pr';
@@ -279,6 +279,7 @@ function registerHarnessIpc() {
     // entitled model shows up; never block the picker on it — return what we have
     // now, and 'harness:models:updated' re-renders it if the refresh lands (§6).
     void refreshCodexCatalog();
+    void refreshLiveModels();
     return effectiveHarnessModels();
   });
   handle('harness:remoteProbe', ({ workspaceId, harness, force }) => {
@@ -859,6 +860,8 @@ function registerSettingsIpc() {
       capture('setup_completed', patch.heardFrom ? { heard_from: patch.heardFrom, $set_once: { heard_from: patch.heardFrom } } : undefined);
     }
     const next = Settings.setGlobal(patch);
+    // Hand-added models change the pickers immediately — push the fresh map.
+    if ('customModels' in patch) broadcast('harness:models:updated', effectiveHarnessModels());
     // A shortcut change must re-render the menu accelerators (§9). Menu.setApplicationMenu is idempotent.
     if ('shortcuts' in patch) rebuildMenu();
     // Turning disk reclaim (back) on frees the archives that piled up meanwhile.
