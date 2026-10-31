@@ -321,7 +321,7 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
                 </button>
               </div>
               <div className="relative min-h-0 flex-1">
-                {previewAbs && splitPane === 'preview' ? (
+                {previewAbs && (splitPane === 'preview' || /\.pdf$/i.test(activeFile ?? '')) ? (
                   <SplitHtmlPreview absPath={previewAbs} />
                 ) : (
                   <React.Suspense
