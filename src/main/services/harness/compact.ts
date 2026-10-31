@@ -1,8 +1,10 @@
 import { hostForWorkspace } from '../../hosts';
+import { broadcast } from '../../bus';
 import { Messages, uid, Workspaces } from '../../db';
-import { modelForTier, type AgentEvent } from '../../../shared/types';
+import type { AgentEvent } from '../../../shared/types';
 import type { Workspace } from '../../../shared/types';
 import { adapters, isAgentRunning, resolveTurn } from './index';
+import { effectiveHarnessModels } from './codex-models';
 import { shellAdapter } from './shell';
 import { wireAdapterStream } from './adapter';
 
@@ -42,13 +44,34 @@ export async function compactChat(
 
   const adapter = adapters[ws.harness] ?? shellAdapter;
   const { base, spawnEnv } = resolveTurn(ws, agentId, null);
+  // The weakest model the harness can actually run right now (live catalog,
+  // strongest→weakest order) — the static tier table can name retired models.
+  const live = effectiveHarnessModels()[ws.harness].filter((m) => m.id);
+  const lightModel = live[live.length - 1]?.id || base.model;
   const cmd = adapter.build({
     ...base,
     prompt,
     sessionId: null, // fresh session: the summary turn itself
-    model: modelForTier(ws.harness, 'light') || base.model,
+    model: lightModel,
     effort: 'low',
   });
+
+  // Immediate visible feedback — this flow runs outside the turn pipeline, so
+  // nothing shows up in the transcript unless we broadcast it ourselves.
+  const note = (content: string) => {
+    const msg = {
+      id: uid(),
+      workspaceId,
+      agentId,
+      role: 'system' as const,
+      content,
+      attachments: [],
+      ts: Date.now(),
+    };
+    Messages.insert(msg);
+    broadcast('chat:message', msg);
+  };
+  note('🧹 正在压缩上下文：用 ' + lightModel + ' 生成会话摘要，通常需要几十秒…');
 
   let summary = '';
   let textSeg = false;
@@ -93,14 +116,6 @@ export async function compactChat(
   // handoff summary in the transcript so the next turn reads naturally.
   const nextSession = newSessionId ?? cmd.sessionHint;
   if (nextSession) Workspaces.setSession(workspaceId, agentId, nextSession);
-  Messages.insert({
-    id: uid(),
-    workspaceId,
-    agentId,
-    role: 'agent',
-    content: '🧹 上下文已压缩，已从全新会话继续。以下是交接摘要：\n\n' + summary.trim(),
-    attachments: [],
-    ts: Date.now(),
-  });
+  note('🧹 上下文已压缩，已从全新会话继续。以下是交接摘要：\n\n' + summary.trim());
   return { ok: true };
 }
