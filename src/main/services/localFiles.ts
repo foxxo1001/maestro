@@ -95,7 +95,7 @@ export function startStaticPreviewServer(): void {
       const body = await readFile(p);
       const ext = p.split('.').pop()?.toLowerCase() ?? '';
       res.writeHead(200, { 'content-type': MIME[ext] ?? 'application/octet-stream' });
-      res.end(body);
+      res.end(ext === 'html' || ext === 'htm' ? injectZoomBridge(body) : body);
     } catch {
       res.writeHead(404);
       res.end('not found');
@@ -109,6 +109,23 @@ export function startStaticPreviewServer(): void {
 
 export function staticPreviewPort(): number {
   return port;
+}
+
+// Wheel events over the preview iframe never reach the parent document, so
+// served HTML gets this bridge: it reports Ctrl+wheel / Ctrl+0 to the pane,
+// which applies CSS zoom on the iframe (see SplitHtmlPreview).
+const ZOOM_BRIDGE =
+  `<script>(function(){var M='__maestroPreviewZoom';` +
+  `addEventListener('wheel',function(e){if(!e.ctrlKey)return;e.preventDefault();` +
+  `parent.postMessage({__maestroPreview:M,delta:e.deltaY<0?1:-1},'*')},{passive:false});` +
+  `addEventListener('keydown',function(e){if(e.ctrlKey&&e.key==='0'){e.preventDefault();` +
+  `parent.postMessage({__maestroPreview:M,reset:1},'*')}},true)}())</script>`;
+
+function injectZoomBridge(body: Buffer): Buffer {
+  const html = body.toString('utf8');
+  const at = html.toLowerCase().lastIndexOf('</body>');
+  if (at < 0) return Buffer.from(html + ZOOM_BRIDGE, 'utf8');
+  return Buffer.from(html.slice(0, at) + ZOOM_BRIDGE + html.slice(at), 'utf8');
 }
 
 /** Case/slash-insensitive containment check against every known root. */

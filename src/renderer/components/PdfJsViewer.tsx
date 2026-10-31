@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import * as pdfjs from 'pdfjs-dist';
+import type { PDFDocumentProxy } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { RotateCw } from 'lucide-react';
+import { PreviewZoomBadge, useCtrlWheelZoom, usePreviewZoom } from './PreviewZoom';
 
 // PDF.js renders pages to canvas — no dependence on Chromium's PDF plugin,
 // which Electron does not enable inside iframes/embeds (a PDF request there
@@ -12,25 +14,55 @@ const MAX_PAGES = 100;
 
 export default function PdfJsViewer({ url, nonce }: { url: string; nonce: number }) {
   const hostRef = useRef<HTMLDivElement>(null);
+  const [doc, setDoc] = useState<PDFDocumentProxy | null>(null);
   const [refresh, setRefresh] = useState(0);
   const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading');
   const [err, setErr] = useState('');
+  const { zoom, step, reset } = usePreviewZoom();
+  useCtrlWheelZoom(hostRef, step);
 
+  // Load the document once per url/refresh; zoom re-renders from the same doc.
   useEffect(() => {
+    let cancelled = false;
+    setStatus('loading');
+    setErr('');
+    setDoc(null);
+    (async () => {
+      try {
+        const d = await pdfjs.getDocument({ url }).promise;
+        if (cancelled) {
+          void d.destroy();
+          return;
+        }
+        setDoc(d);
+      } catch (e) {
+        if (!cancelled) {
+          setStatus('error');
+          setErr(e instanceof Error ? e.message : String(e));
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [url, refresh]);
+
+  // Render pages at the current zoom; keeps the scroll position roughly put.
+  useEffect(() => {
+    if (!doc) return;
     let cancelled = false;
     const host = hostRef.current;
     if (!host) return;
+    const prevRatio = host.scrollHeight > 0 ? host.scrollTop / host.scrollHeight : 0;
     host.innerHTML = '';
-    setStatus('loading');
     (async () => {
       try {
-        const doc = await pdfjs.getDocument({ url }).promise;
         const pages = Math.min(doc.numPages, MAX_PAGES);
         for (let i = 1; i <= pages; i++) {
           if (cancelled) return;
           const page = await doc.getPage(i);
           const base = page.getViewport({ scale: 1 });
-          const scale = Math.max(0.4, (host.clientWidth - 24) / base.width);
+          const scale = Math.max(0.4, (host.clientWidth - 24) / base.width) * zoom;
           const vp = page.getViewport({ scale });
           const dpr = window.devicePixelRatio || 1;
           const canvas = document.createElement('canvas');
@@ -48,7 +80,10 @@ export default function PdfJsViewer({ url, nonce }: { url: string; nonce: number
             transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : undefined,
           }).promise;
         }
-        if (!cancelled) setStatus('ok');
+        if (!cancelled) {
+          host.scrollTop = prevRatio * host.scrollHeight;
+          setStatus('ok');
+        }
       } catch (e) {
         if (!cancelled) {
           setStatus('error');
@@ -59,7 +94,14 @@ export default function PdfJsViewer({ url, nonce }: { url: string; nonce: number
     return () => {
       cancelled = true;
     };
-  }, [url, nonce, refresh]);
+  }, [doc, zoom]);
+
+  // Drop the worker-side doc when the viewer unmounts or reloads.
+  useEffect(() => {
+    return () => {
+      void doc?.destroy();
+    };
+  }, [doc]);
 
   return (
     <div className="absolute inset-0 bg-[#525659]">
@@ -79,6 +121,7 @@ export default function PdfJsViewer({ url, nonce }: { url: string; nonce: number
       >
         <RotateCw size={11} />
       </button>
+      <PreviewZoomBadge zoom={zoom} onStep={step} onReset={reset} />
     </div>
   );
 }
