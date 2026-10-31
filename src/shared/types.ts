@@ -404,6 +404,8 @@ export interface GlobalSettings {
   /** Per-model context-window overrides (Settings → General): model id →
    *  tokens. Applied on top of whatever the catalogs report. */
   contextWindows?: Record<string, number>;
+  /** Harness groups collapsed in the composer's model menu. */
+  collapsedModelGroups?: HarnessId[];
   /** User's orchestrator + specialist stack. Per-role, per-field overrides of
    *  DEFAULT_ROLES (harness/model/effort/instructions/label/blurb), keyed by role
    *  id; also holds the full definition of each user-created role. Global across
@@ -2291,6 +2293,8 @@ export interface IpcInvokeMap {
     void
   ];
   'preview:setBounds': [{ workspaceId: string; bounds: Rect }, void];
+  /** Summarize the chat and continue from a fresh session. */
+  'chat:compact': [{ workspaceId: string; agentId: number }, { ok: boolean; error?: string }];
   /** Port of the local static preview server (127.0.0.1, started at boot). */
   'preview:staticPort': [{}, number];
   'preview:setVisible': [{ workspaceId: string; visible: boolean }, void];

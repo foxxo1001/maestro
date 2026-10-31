@@ -38,6 +38,7 @@ import {
 import { readOAuthCreds } from './services/harness/claude';
 import { effectiveHarnessModels, refreshCodexCatalog, refreshLiveModels } from './services/harness/codex-models';
 import { staticPreviewPort } from './services/localFiles';
+import { compactChat } from './services/harness/compact';
 import { clearFinishedTasks, workspaceBackgroundTasks } from './services/harness/tasks';
 import { installRemoteHarness, probeRemoteHarness } from './services/harness/remote';
 import { createPr, mergePr, refreshPr } from './services/pr';
@@ -530,6 +531,7 @@ function registerPreviewIpc() {
     navigatePreview(mustWorkspace(workspaceId).id, action, url)
   );
   handle('preview:staticPort', () => staticPreviewPort());
+  handle('chat:compact', ({ workspaceId, agentId }) => compactChat(mustWorkspace(workspaceId).id, agentId));
   handle('preview:setBounds', ({ workspaceId, bounds }) => setPreviewBounds(workspaceId, bounds));
   handle('preview:setVisible', ({ workspaceId, visible }) => setPreviewVisible(workspaceId, visible));
   handle('preview:close', ({ workspaceId }) => closePreview(workspaceId));

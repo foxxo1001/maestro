@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
-import { ArrowRight, ArrowUp, Bookmark, Check, ChevronDown, ChevronLeft, ChevronRight, Clock, ImagePlus, Mic, NotebookPen, Pencil, Plus, Search, Sparkles, Square, Terminal as TerminalIcon, Waypoints, X } from 'lucide-react';
+import { ArrowRight, ArrowUp, Bookmark, Check, ChevronDown, ChevronLeft, ChevronRight, Clock, Eraser, ImagePlus, Mic, NotebookPen, Pencil, Plus, Search, Sparkles, Square, Terminal as TerminalIcon, Waypoints, X } from 'lucide-react';
 import { HarnessLogo } from '../../shared/ui/brandIcons';
 import { invoke, on, tryInvoke } from '../lib/api';
 import { EMPTY_ARR, useApp } from '../store/app';
@@ -74,6 +74,7 @@ export default function Composer({
   const [modelMenu, setModelMenu] = useState(false);
   // Inline context-window edit for the current model, inside the model menu.
   const [ctxDraft, setCtxDraft] = useState<string | null>(null);
+  const [compacting, setCompacting] = useState(false);
   const [effortMenu, setEffortMenu] = useState(false);
   const [rolesMenu, setRolesMenu] = useState(false);
   const [scheduleMenu, setScheduleMenu] = useState(false);
@@ -938,6 +939,15 @@ export default function Composer({
                   {harnessGroups.map((h, gi) => {
                     const hModels = HM[h.id] ?? [];
                     const hDefault = resolveDefaultModel(h.id, settings.defaultModels);
+                    const collapsed = settings.collapsedModelGroups?.includes(h.id) ?? false;
+                    const toggleGroup = () => {
+                      const cur = settings.collapsedModelGroups ?? [];
+                      void useApp
+                        .getState()
+                        .saveSettings({
+                          collapsedModelGroups: cur.includes(h.id) ? cur.filter((x) => x !== h.id) : [...cur, h.id],
+                        });
+                    };
                     const ready = harnessReady(h);
                     const remoteStatus = projectHostId ? remoteHarnesses?.find((r) => r.harness === h.id) : undefined;
                     const setupSt = projectHostId ? remoteSetup[`${workspace.id}:${h.id}`] : undefined;
@@ -945,8 +955,18 @@ export default function Composer({
                       <div key={h.id}>
                         {gi > 0 && <div className="mx-2.5 my-1 border-t" />}
                         <div className="flex items-center gap-1.5 px-3 pb-0.5 pt-1.5 text-xs font-medium text-faint">
-                          <HarnessLogo harness={h.id} size={12} />
-                          <span className="truncate">{h.displayName}</span>
+                          <button
+                            className="flex min-w-0 flex-1 items-center gap-1 text-left"
+                            title={collapsed ? '展开' : '折叠'}
+                            onClick={toggleGroup}
+                          >
+                            <ChevronDown
+                              size={11}
+                              className={clsx('shrink-0 transition-transform', collapsed && '-rotate-90')}
+                            />
+                            <HarnessLogo harness={h.id} size={12} />
+                            <span className="truncate">{h.displayName}</span>
+                          </button>
                           {projectHostId ? (
                             // Remote (SSH): a ready harness needs NO badge — its
                             // models are simply selectable. Show an affordance only
@@ -1007,7 +1027,7 @@ export default function Composer({
                             )
                           )}
                         </div>
-                        {hModels.map((m) => (
+                        {!collapsed && hModels.map((m) => (
                           <PickerOption
                             key={`${h.id}:${m.id}`}
                             label={m.label}
@@ -1165,6 +1185,29 @@ export default function Composer({
               </div>
             )}
 
+            <button
+              className={clsx(
+                'flex h-7 w-7 items-center justify-center rounded-full transition-colors',
+                compacting ? 'text-accent' : 'text-muted hover:bg-accent-soft hover:text-fg'
+              )}
+              title="压缩上下文：用轻量模型生成会话摘要，并从全新会话继续"
+              disabled={compacting}
+              onClick={async () => {
+                if (
+                  !confirm(
+                    '压缩上下文？\n\n将用当前 agent 的轻量模型把本会话总结成一份交接摘要，然后从全新会话继续（当前 CLI 会话作废，历史记录仍保留在聊天里）。'
+                  )
+                )
+                  return;
+                setCompacting(true);
+                const { error } = await tryInvoke('chat:compact', { workspaceId: workspace.id, agentId });
+                setCompacting(false);
+                if (error) useApp.getState().toast('error', `压缩失败：${error}`);
+                else useApp.getState().toast('success', '上下文已压缩，已从新会话继续');
+              }}
+            >
+              {compacting ? <Spinner size={12} /> : <Eraser size={13} />}
+            </button>
             <UsageRing harness={workspace.harness} logins={logins} onReload={reloadLogins} />
             <ContextRing tokens={contextTokens} usage={chatMeta?.usage} window={contextWindowForModel(model, HM)} />
 
