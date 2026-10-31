@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
-import { ArrowDown, Check, ChevronDown, ChevronRight, Copy, KeyRound, Pencil, ShieldAlert, Waypoints } from 'lucide-react';
+import { AlertTriangle, ArrowDown, Check, ChevronDown, ChevronRight, Copy, Eraser, KeyRound, Pencil, ShieldAlert, Waypoints } from 'lucide-react';
 import { HarnessLogo } from './brandIcons';
 import type { AgentBlock, ChatMessage } from '../types';
 import { formatDuration, timeAgo } from './format';
@@ -318,6 +318,42 @@ export function SystemMessageView({
       <div className="fade-in flex gap-2.5 rounded-card bg-surface px-3.5 py-3">
         <ShieldAlert size={13} className="mt-0.5 shrink-0 text-warn" />
         <Markdown text={message.content} className="min-w-0 flex-1 text-xs" />
+      </div>
+    );
+  // Context-compaction notes (compact.ts) — a progress line, a success card
+  // with the handoff summary collapsed, or a failure card. None are dead-end
+  // errors, so none get the plain red style below.
+  const compaction = message.meta?.compaction;
+  if (compaction === 'success' || compaction === 'progress') {
+    const at = message.content.indexOf('\n\n');
+    const header = (at < 0 ? message.content : message.content.slice(0, at)).replace(/^🧹\s*/, '');
+    const summary = at < 0 ? '' : message.content.slice(at + 2);
+    return (
+      <div className="fade-in flex gap-2.5 rounded-card bg-surface px-3.5 py-3">
+        {compaction === 'success' ? (
+          <Eraser size={13} className="mt-0.5 shrink-0 text-ok" />
+        ) : (
+          <Spinner size={13} className="mt-0.5 shrink-0 text-muted" />
+        )}
+        <div className="min-w-0 flex-1 text-xs">
+          <div className="break-words text-muted">{header}</div>
+          {compaction === 'success' && summary && (
+            <details className="mt-1.5">
+              <summary className="cursor-pointer select-none text-2xs text-muted transition-colors hover:text-fg">
+                展开交接摘要
+              </summary>
+              <Markdown text={summary} className="mt-1.5" />
+            </details>
+          )}
+        </div>
+      </div>
+    );
+  }
+  if (compaction === 'failure')
+    return (
+      <div className="fade-in flex items-start gap-2.5 rounded-card border border-err/25 bg-err/5 px-3.5 py-3 text-xs text-err">
+        <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+        <span className="min-w-0 flex-1 break-words">{message.content.replace(/^🧹\s*/, '')}</span>
       </div>
     );
   if (!fix)

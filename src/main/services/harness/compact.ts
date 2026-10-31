@@ -70,7 +70,7 @@ export async function compactChat(
 
   // Immediate visible feedback — this flow runs outside the turn pipeline, so
   // nothing shows up in the transcript unless we broadcast it ourselves.
-  const note = (content: string) => {
+  const note = (content: string, compaction: 'progress' | 'success' | 'failure') => {
     const msg = {
       id: uid(),
       workspaceId,
@@ -79,11 +79,12 @@ export async function compactChat(
       content,
       attachments: [],
       ts: Date.now(),
+      meta: { compaction },
     };
     Messages.insert(msg);
     broadcast('chat:message', msg);
   };
-  note('🧹 正在压缩上下文：用 ' + lightModel + ' 生成会话摘要，通常需要几十秒…');
+  note('🧹 正在压缩上下文：用 ' + lightModel + ' 生成会话摘要，通常需要几十秒…', 'progress');
 
   let summary = '';
   // Mirrors blocks.ts auto-open semantics: a seg-delta with no open segment is
@@ -132,7 +133,7 @@ export async function compactChat(
   if (!result.ok) {
     // Persist the failure — the renderer toast is transient, and this notes log
     // is the only record of what a compaction attempt actually hit.
-    note('🧹 压缩失败：' + (result.error ?? '未知原因'));
+    note('🧹 压缩失败：' + (result.error ?? '未知原因'), 'failure');
     return result;
   }
 
@@ -151,7 +152,8 @@ export async function compactChat(
     `🧹 上下文已压缩，已从全新会话继续。占用暂按摘要估算为约 ${Math.max(1, Math.round(estTokens / 1000))}k tokens；` +
     `下一条真实消息会回填 CLI 实测值——它包含 CLI 固定的系统提示基线（如 grok 约 9 万 tokens），比估算值大是正常现象。` +
     `以下是交接摘要：\n\n` +
-    summary.trim()
+    summary.trim(),
+    'success'
   );
   Workspaces.patchChat(workspaceId, agentId, {
     contextTokens: estTokens,

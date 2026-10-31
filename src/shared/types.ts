@@ -303,6 +303,10 @@ export interface ChatMessage {
      *  guard stopping a runaway process). Every other agent/system message marks
      *  the end of a run; this one must leave the live turn alone. */
     midTurn?: boolean;
+    /** A context-compaction note — rendered as its own card (progress/success/
+     *  failure) instead of the dead-end error style, with the handoff summary
+     *  collapsible. */
+    compaction?: 'progress' | 'success' | 'failure';
   };
 }
 
