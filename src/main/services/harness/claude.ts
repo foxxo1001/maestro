@@ -6,6 +6,7 @@ import { run } from '../../exec';
 import { modelSupportsEffort, type HarnessAuthFault, type SubUsage, type SubUsageWindow } from '../../../shared/types';
 import { parseClaudeLine } from '../../../shared/harness/parse';
 import { detectVersion, type BuildOpts, type HarnessAdapter } from './adapter';
+import { claudeMcpConfigFile } from '../mcp';
 
 /** Claude Code's own config dir (`CLAUDE_CONFIG_DIR` when the user moved it).
  *  `MAESTRO_CLAUDE_HOME` is a dev/test override (mirrors `MAESTRO_CONDUCTOR_HOME`)
@@ -377,6 +378,10 @@ export const claudeAdapter: HarnessAdapter = {
     }
     if (systemPrompt) args.push('--append-system-prompt', systemPrompt);
     if (opts.model) args.push('--model', opts.model);
+    if (opts.mcpServers?.length) {
+      const file = claudeMcpConfigFile(opts.mcpServers);
+      if (file) args.push('--mcp-config', file);
+    }
     return { cmd: 'claude', args, stdin: opts.prompt, env };
   },
 

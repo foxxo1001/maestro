@@ -7,3 +7,8 @@ release/
 *.local
 build/icon.iconset/
 .vercel
+
+# 二开本地测试（不入库）
+.dev-user-data/
+.tmp-test/
+.mcp-test/

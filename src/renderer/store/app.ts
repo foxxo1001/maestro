@@ -134,7 +134,7 @@ type Modal =
   /** Sync chats from Claude Code & Codex (harness-chat-sync §4.1). */
   | { kind: 'harness-sync' }
   | { kind: 'github-signin' }
-  | { kind: 'settings'; tab?: 'general' | 'harnesses' | 'repository' | 'integrations' | 'cloud' | 'account' }
+  | { kind: 'settings'; tab?: 'general' | 'harnesses' | 'mcp' | 'repository' | 'integrations' | 'cloud' | 'account' }
   | { kind: 'branch-conflict'; workspaceId: string; branch: string; message: string }
   | {
       kind: 'confirm';

@@ -294,3 +294,38 @@ structured blocks, so history renders identically after a restore. The UI shares
 <sub>Copyright © 2026 Maestro contributors. [Business Source License 1.1](LICENSE): read, run, self-host, modify, and redistribute freely; you just can't offer Maestro to third parties as a competing hosted or embedded service. Four years after each version ships, it converts to Apache 2.0.</sub>
 
 </div>
+
+---
+
+## 二开说明（fork by @foxxo1001，个人自用）
+
+在上游 v0.1.81 基础上的改动：
+
+### 新增：MCP server 接入（Settings → MCP）
+
+- 设置页管理 MCP **stdio** server 列表（command / args / env / 启用开关），配置存在全局 settings 里。
+- 每次本地会话启动时自动注入到支持的 agent CLI（server 进程由 CLI 自己拉起、自己当 MCP client）：
+  - **Claude Code**：生成 `--mcp-config` JSON（`%TEMP%\maestro-mcp\claude.json`），与用户自己的 MCP 配置合并（事件流里 `source: dynamic`）。
+  - **Codex**：以 `codex exec -c mcp_servers.<id>.*` 运行时覆盖注入，不改用户的 config.toml。
+  - **Kimi**：CLI 暂无 MCP 入口，不注入。
+- 云端 / SSH 工作区暂不注入（配置文件只在本机有意义）。
+- 相关代码：`src/shared/types.ts`（`McpServerConfig`）、`src/main/services/mcp.ts`、`src/main/services/harness/{claude,codex}.ts`、`src/main/services/harness/index.ts`（resolveTurn 接线）、`src/renderer/components/McpSettings.tsx`。
+
+### 变更：自动更新默认停用
+
+- fork 不检查上游更新源（避免被"更新"回上游版本）。需要时设 `MAESTRO_FORK_UPDATER=1` 重新打开。
+- 遥测无需处理：上游本就在未配置 PostHog key 时静默，fork 永远不发数据。
+
+### 开发环境（Windows）
+
+```bash
+npm install
+npm run rebuild   # better-sqlite3 / node-pty 重编译到 Electron ABI（需 VS Build Tools）
+npm run build     # 先构建一次 main 进程（dist/main/index.cjs），dev 依赖它，新 clone 必做
+npm run dev       # vite + electron（HMR）
+```
+
+- 若 `npm run dev` 异常，可分步跑：`npx vite` 起前端，另开终端
+  `VITE_DEV_SERVER_URL=http://localhost:5173 npx electron .`。
+- dev 数据与正式安装版隔离：设 `MAESTRO_USER_DATA=<目录>`（本机用 `.dev-user-data/`，已 gitignore）。
+- 包管理器为 npm（项目带 package-lock.json，勿用 pnpm）。

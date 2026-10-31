@@ -24,6 +24,7 @@ import type {
   Workspace,
 } from '../../../shared/types';
 import { wireAdapterStream, type BuildOpts, type HarnessAdapter } from './adapter';
+import { enabledMcpServers } from '../mcp';
 import { applyBlockEvent, finalizeBlocks, newBlockStream, snapshotBlocks, summarizeBlocks, type BlockStream } from '../../../shared/harness/blocks';
 import { applyTaskEvent, reapBackgroundTasks } from './tasks';
 import { setMemGuardReporter, trackTurnProcess, type GuardKill } from '../memguard';
@@ -726,19 +727,23 @@ export function resolveTurn(
   // harness actually having a plan-style mode — so a stale flag left over from a
   // harness switch can't distort another CLI's approval flags.
   const planMode = !!chatMeta.planMode && ws.harness in HARNESS_PLAN_MODE;
+  // MCP injection is local-only: the config rides a file/flag path meaningful
+  // on this machine, which a cloud box or SSH host can't share (its CLI would
+  // need its own server list).
+  const local = !isCloudWorkspace(ws) && !Projects.get(ws.projectId)?.hostId;
   const base = {
     permissionMode: planMode ? ('plan' as const) : settings.permissionMode,
     systemPrompt,
     model,
     effort,
     apiKeyMode: !!settings.harnessApiKeys?.[ws.harness]?.trim(),
+    mcpServers: local ? enabledMcpServers(settings) : undefined,
   };
   // env depends only on model/effort — a probe build yields it prompt-independently.
   const probeEnv = adapter.build({ ...base, prompt: '', sessionId: null }).env ?? {};
   // The active login reaches a LOCAL child through its credential-isolation env.
   // A cloud box or SSH host has its own credential store, so a Mac-local dir path
   // means nothing there — skip it and record the run as the default login.
-  const local = !isCloudWorkspace(ws) && !Projects.get(ws.projectId)?.hostId;
   const loginId = local ? activeLogin(ws.harness).id : DEFAULT_LOGIN_ID;
   const loginEnv = local ? harnessLoginEnv(ws.harness, loginId) : {};
   const spawnEnv = {

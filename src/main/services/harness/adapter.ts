@@ -1,6 +1,6 @@
 import { run } from '../../exec';
 import type { HostChild } from '../../hosts/types';
-import type { AgentEvent, GlobalSettings, HarnessId, HarnessInfo, SubUsage } from '../../../shared/types';
+import type { AgentEvent, GlobalSettings, HarnessId, HarnessInfo, McpServerConfig, SubUsage } from '../../../shared/types';
 
 export interface BuildOpts {
   prompt: string;
@@ -15,6 +15,9 @@ export interface BuildOpts {
    *  harnessKeyEnv injects into the spawn env. Lets an adapter whose CLI needs
    *  more than one env var for key auth switch modes (kimi). */
   apiKeyMode?: boolean;
+  /** MCP stdio servers to hand to this run (harness-dependent; local runs
+   *  only — see services/mcp). */
+  mcpServers?: McpServerConfig[];
 }
 
 export interface AdapterCommand {

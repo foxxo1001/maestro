@@ -331,6 +331,26 @@ export interface RepoSettings {
   instructions: string;
 }
 
+/** A Model Context Protocol (MCP) stdio server Maestro hands to harness CLIs
+ *  that support MCP — claude-code via `--mcp-config`, codex via `-c
+ *  mcp_servers.*`. The CLI spawns and owns the server process for the run;
+ *  Maestro only manages the list (Settings → MCP). */
+export interface McpServerConfig {
+  /** Stable slug used as the server key in CLI configs (claude JSON key /
+   *  codex TOML path). Restrained to [a-zA-Z0-9_-]. */
+  id: string;
+  /** Display name (Settings UI). */
+  name: string;
+  /** Command to launch the server, e.g. `npx`. */
+  command: string;
+  /** Arguments, e.g. ['-y', '@modelcontextprotocol/server-filesystem', 'D:/tmp']. */
+  args: string[];
+  /** Extra environment for the server process. */
+  env?: Record<string, string>;
+  /** Disabled servers are kept but never injected. */
+  enabled: boolean;
+}
+
 export interface GlobalSettings {
   /** Light / dark variant: follow the OS, or pin one. */
   theme: ThemeMode;
@@ -373,6 +393,10 @@ export interface GlobalSettings {
    *  var (e.g. CURSOR_API_KEY) for its runs; empty/absent = use the CLI's own
    *  login. Managed from Settings → Harnesses. */
   harnessApiKeys?: Partial<Record<HarnessId, string>>;
+  /** MCP stdio servers injected into harness runs that support them (local
+   *  runs only). Managed from Settings → MCP. Absent on installs predating
+   *  MCP support. */
+  mcpServers?: McpServerConfig[];
   /** User's orchestrator + specialist stack. Per-role, per-field overrides of
    *  DEFAULT_ROLES (harness/model/effort/instructions/label/blurb), keyed by role
    *  id; also holds the full definition of each user-created role. Global across

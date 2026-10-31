@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import {
+  Blocks,
   CircleUser,
   Cloud,
   Cpu,
@@ -23,6 +24,7 @@ import { COMPLETION_SOUNDS, SOUND_GROUP_ORDER, playCompletionSound, playQuestion
 import { hostLabel } from '../lib/hosts';
 import { timeAgo } from '../../shared/ui/format';
 import HarnessesTab, { SettingsRow, SettingsSection } from './HarnessesSettings';
+import McpTab from './McpSettings';
 import { ThemePicker } from '../../shared/ui/ThemePicker';
 import { normalizeColorTheme } from '../../shared/themes';
 import { isEffectsMode, lowEndReason } from '../../shared/ui/effects';
@@ -38,7 +40,7 @@ import type {
   UpdateCheckOutcome,
 } from '../../shared/types';
 
-type Tab = 'general' | 'harnesses' | 'shortcuts' | 'repository' | 'integrations' | 'cloud' | 'account';
+type Tab = 'general' | 'harnesses' | 'mcp' | 'shortcuts' | 'repository' | 'integrations' | 'cloud' | 'account';
 
 // Left-nav groups (sentence case).
 const NAV: { group: string; items: [Tab, string, typeof Cpu][] }[] = [
@@ -53,6 +55,7 @@ const NAV: { group: string; items: [Tab, string, typeof Cpu][] }[] = [
   {
     group: 'Connections',
     items: [
+      ['mcp', 'MCP', Blocks],
       ['integrations', 'Integrations', Plug],
       ['cloud', 'Cloud', Cloud],
       ['account', 'Account', CircleUser],
@@ -110,6 +113,7 @@ export default function SettingsModal() {
             <h2 className="mb-6 text-lg font-semibold tracking-tight">{current?.[1] ?? 'Settings'}</h2>
             {tab === 'general' && <GeneralTab />}
             {tab === 'harnesses' && <HarnessesTab />}
+            {tab === 'mcp' && <McpTab />}
             {tab === 'shortcuts' && <ShortcutsTab />}
             {tab === 'cloud' && <CloudTab />}
             {tab === 'account' && <AccountTab />}

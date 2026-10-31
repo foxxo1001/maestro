@@ -3,6 +3,7 @@ import path from 'path';
 import { parseCodexLine } from '../../../shared/harness/parse';
 import { detectVersion, promptWithSystem, type BuildOpts, type HarnessAdapter } from './adapter';
 import { codexReasoningEffort } from './codex-models';
+import { codexMcpArgs } from '../mcp';
 
 /** Codex's home dir (`CODEX_HOME` when the user moved it). `MAESTRO_CODEX_HOME`
  *  is a dev/test override (mirrors `claudeDir()`) so the harness-sync fixtures can
@@ -38,6 +39,7 @@ export const codexAdapter: HarnessAdapter = {
       // models); translate/clamp our stored id to one this model advertises.
       common.push('-c', `model_reasoning_effort=${codexReasoningEffort(opts.model ?? '', opts.effort)}`);
     }
+    if (opts.mcpServers?.length) common.push(...codexMcpArgs(opts.mcpServers));
     const args = opts.sessionId
       ? ['exec', 'resume', opts.sessionId, ...common, '-']
       : ['exec', ...common, '-'];

@@ -9,6 +9,11 @@ import type { AppUpdate, UpdateCheckOutcome } from '../../shared/types';
 // electron-builder bakes into the packaged app from `build.publish`, so there's
 // nothing to configure at runtime — we only wire the lifecycle:
 //   check → background download → 'update-downloaded' → popup → quitAndInstall().
+//
+// Fork switch: this fork doesn't share upstream's update feed (checking would
+// offer to "update" us back to upstream builds). Auto and manual checks stay
+// off unless MAESTRO_FORK_UPDATER=1 opts back in.
+const FORK_UPDATER = process.env.MAESTRO_FORK_UPDATER === '1';
 
 let pending: AppUpdate | null = null;
 // The version currently downloading, captured from 'update-available' so the
@@ -81,7 +86,7 @@ function detectInstalled() {
 
 /** Start background update checks. No-op in dev (there is no app-update.yml). */
 export function initUpdater() {
-  if (!app.isPackaged) return;
+  if (!app.isPackaged || !FORK_UPDATER) return;
 
   // Surface a one-time confirmation if we just relaunched into a new version.
   // Runs before the checks are wired so the result is ready by the time the
@@ -192,7 +197,7 @@ export function installUpdate() {
  * and 'update-downloaded' surfaces the restart toast when it lands).
  */
 export async function checkForUpdatesNow(): Promise<UpdateCheckOutcome> {
-  if (!app.isPackaged) return { status: 'disabled' };
+  if (!app.isPackaged || !FORK_UPDATER) return { status: 'disabled' };
   if (pending) {
     // Already downloaded and waiting — re-surface the restart toast, and tell
     // the caller so it can point the user at it.
