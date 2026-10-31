@@ -129,6 +129,10 @@ interface RunHandle {
   // The original send, so a rotated retry can re-run the same turn under a new
   // login. Undefined for journal/cloud turns (they don't rotate).
   send?: SendOpts;
+  // A native compaction command turn (claude `/compact`): it re-reads the whole
+  // pre-compact transcript to write its summary, so its usage events carry the
+  // FULL old context. finalize stores a summary-size estimate instead of those.
+  compactCommand?: boolean;
   // A cloud turn replayed from the journal during catch-up: skip the live
   // Notification (a single away-digest is posted instead — §6.5) and run the
   // follower's per-turn callback so it can advance the journal offset.
@@ -419,7 +423,23 @@ async function finalize(h: RunHandle, done: DoneEvent) {
   // Prefer the per-call measurement (claude adapter); done-event fields are a
   // fallback for adapters that only report usage once at turn end.
   const ctx = h.context ?? (done.contextTokens ? { contextTokens: done.contextTokens, usage: done.usage } : null);
-  if (ctx) {
+  if (h.compactCommand) {
+    // A native compaction turn re-reads the WHOLE pre-compact transcript to
+    // write its summary, so its usage events carry the full old context —
+    // persisting them leaves the ring stuck at the pre-compact size until the
+    // next real message. Store a summary-size estimate instead (same shape as
+    // compact.ts's light-model path); the next real turn overwrites it with the
+    // CLI's own measurement.
+    const summaryText = snapshotBlocks(h.stream)
+      .filter((b) => b.type === 'text')
+      .map((b) => (b as { text?: string }).text ?? '')
+      .join('');
+    const estTokens = Math.max(1_000, Math.round(summaryText.trim().length / 3));
+    Workspaces.patchChat(h.workspaceId, h.agentId, {
+      contextTokens: estTokens,
+      usage: { input: estTokens, cacheRead: 0, cacheCreation: 0, output: 0 },
+    });
+  } else if (ctx) {
     Workspaces.patchChat(h.workspaceId, h.agentId, {
       contextTokens: ctx.contextTokens,
       usage: ctx.usage,
@@ -429,9 +449,11 @@ async function finalize(h: RunHandle, done: DoneEvent) {
   // Auto-compact (context hygiene à la HumanLayer / DeepSeek prefix-cache
   // practice): when occupancy crosses the threshold, run a summary turn in a
   // fresh session so the conversation keeps a small, cache-friendly prefix.
-  // Deferred via dynamic import — compact.ts imports this module.
+  // Skipped for a compaction turn itself — its pre-compact measurement would
+  // re-trigger compaction on the just-compacted session. Deferred via dynamic
+  // import — compact.ts imports this module.
   const cfg = Settings.global();
-  if (cfg.autoCompact !== false && ctx) {
+  if (cfg.autoCompact !== false && ctx && !h.compactCommand) {
     const at = (cfg.autoCompactAt ?? 50) / 100;
     const wsNow = Workspaces.get(h.workspaceId);
     if (wsNow && !isAgentRunning(h.workspaceId, h.agentId)) {
@@ -815,6 +837,7 @@ export function startAgent(opts: SendOpts): { ok: boolean; error?: string } {
     stdin: cmd.stdin,
     cmdName: cmd.cmd,
     sessionHint: cmd.sessionHint,
+    compactCommand: opts.prompt.trim() === '/compact',
     // Snapshot the original send + the login it ran under, so finalize can
     // rotate to another login and re-run this exact turn on a usage limit. The
     // re-run is a new turn (this one is already finalized), so it gets a new id.
@@ -845,6 +868,8 @@ export interface BeginTurnOpts {
    *  under a different login. Undefined for journal/cloud turns (they don't
    *  rotate). */
   send?: SendOpts;
+  /** native compaction command turn (claude `/compact`) — see RunHandle. */
+  compactCommand?: boolean;
   /** the login this turn ran under (default when omitted). */
   loginId?: string;
 }
@@ -878,6 +903,10 @@ export function beginTurn(
     limit: null,
     loginId: opts.loginId ?? DEFAULT_LOGIN_ID,
     send: opts.send,
+    // Only claude's native /compact reliably compacts in-session; for other
+    // harnesses a typed '/compact' stays a normal turn (their CLI may treat it
+    // as prose or no-op, and the estimate would then be wrong).
+    compactCommand: opts.compactCommand === true && adapter.id === 'claude-code',
     quiet: opts.quiet,
     onFinalized: opts.onFinalized,
   };

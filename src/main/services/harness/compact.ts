@@ -86,7 +86,11 @@ export async function compactChat(
   note('🧹 正在压缩上下文：用 ' + lightModel + ' 生成会话摘要，通常需要几十秒…');
 
   let summary = '';
-  let textSeg = false;
+  // Mirrors blocks.ts auto-open semantics: a seg-delta with no open segment is
+  // TEXT. grok's prose arrives as {type:'text'} chips that emit seg-delta only
+  // (no seg-start), and codex content blocks do the same — gating on an
+  // explicit seg-start dropped every chip and read as "no summary returned".
+  let segType: 'text' | 'thinking' | null = null;
   let newSessionId: string | null = null;
   let doneEv: { ok: boolean; error?: string } | null = null;
   let stderrTail = '';
@@ -108,8 +112,8 @@ export async function compactChat(
       });
       wireAdapterStream(child, adapter, cmd.stdin, (ev: AgentEvent) => {
         if (ev.kind === 'session') newSessionId = ev.sessionId;
-        else if (ev.kind === 'seg-start') textSeg = ev.segType === 'text';
-        else if (ev.kind === 'seg-delta' && textSeg) summary += ev.text;
+        else if (ev.kind === 'seg-start') segType = ev.segType;
+        else if (ev.kind === 'seg-delta' && (segType ?? 'text') === 'text') summary += ev.text;
         else if (ev.kind === 'done') doneEv = { ok: ev.ok, error: ev.error };
       }, (chunk) => {
         stderrTail = (stderrTail + chunk).slice(-800);
@@ -125,19 +129,30 @@ export async function compactChat(
     }
   });
 
-  if (!result.ok) return result;
+  if (!result.ok) {
+    // Persist the failure — the renderer toast is transient, and this notes log
+    // is the only record of what a compaction attempt actually hit.
+    note('🧹 压缩失败：' + (result.error ?? '未知原因'));
+    return result;
+  }
 
   // Re-point the chat at the fresh session (adapter-minted hints win over the
   // parsed session event when a CLI never announces one), and leave the
   // handoff summary in the transcript so the next turn reads naturally.
   const nextSession = newSessionId ?? cmd.sessionHint;
   if (nextSession) Workspaces.setSession(workspaceId, agentId, nextSession);
-  note('🧹 上下文已压缩，已从全新会话继续。以下是交接摘要：\n\n' + summary.trim());
   // Drop the context ring right away: the fresh session carries roughly just
   // the summary. This is an estimate — the next real turn overwrites it with
-  // the CLI's own measurement (which includes the CLI's system-prompt
-  // baseline, e.g. grok's ~68k, on top of the summary).
+  // the CLI's own measurement, which includes the CLI's system-prompt baseline
+  // on top of the summary (grok measured ~68k input / ~90k+ occupancy for a
+  // trivial prompt on 2026-10-31 — compaction can never go below that).
   const estTokens = Math.max(1_000, Math.round(summary.trim().length / 3));
+  note(
+    `🧹 上下文已压缩，已从全新会话继续。占用暂按摘要估算为约 ${Math.max(1, Math.round(estTokens / 1000))}k tokens；` +
+    `下一条真实消息会回填 CLI 实测值——它包含 CLI 固定的系统提示基线（如 grok 约 9 万 tokens），比估算值大是正常现象。` +
+    `以下是交接摘要：\n\n` +
+    summary.trim()
+  );
   Workspaces.patchChat(workspaceId, agentId, {
     contextTokens: estTokens,
     usage: { input: estTokens, cacheRead: 0, cacheCreation: 0, output: 0 },
