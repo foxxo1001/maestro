@@ -861,7 +861,8 @@ function registerSettingsIpc() {
     }
     const next = Settings.setGlobal(patch);
     // Hand-added models change the pickers immediately — push the fresh map.
-    if ('customModels' in patch) broadcast('harness:models:updated', effectiveHarnessModels());
+    if ('customModels' in patch || 'contextWindows' in patch)
+      broadcast('harness:models:updated', effectiveHarnessModels());
     // A shortcut change must re-render the menu accelerators (§9). Menu.setApplicationMenu is idempotent.
     if ('shortcuts' in patch) rebuildMenu();
     // Turning disk reclaim (back) on frees the archives that piled up meanwhile.

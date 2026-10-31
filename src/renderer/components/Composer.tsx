@@ -40,6 +40,22 @@ import { timeAgo } from '../../shared/ui/format';
 import { GLASS_FIELD, LiquidGlass } from '../../shared/ui/LiquidGlass';
 import { t as zh } from '../../shared/i18n';
 
+/** 200000 → 200k, 1048576 → 1M；空值返回空串。 */
+const fmtTokens = (n?: number): string => {
+  if (!n || n <= 0) return '';
+  if (n >= 1e6) return `${+(n / 1e6).toFixed(1)}M`;
+  if (n >= 1000) return `${Math.round(n / 1000)}k`;
+  return `${n}`;
+};
+
+/** 接受 256k / 1m / 128000 这类写法；非法输入返回 null。 */
+const parseTokens = (s: string): number | null => {
+  const m = s.trim().match(/^(\d+(?:\.\d+)?)\s*(k|m|百万)?$/i);
+  if (!m) return null;
+  const v = parseFloat(m[1]) * (m[2]?.toLowerCase() === 'm' || m[2] === '百万' ? 1e6 : m[2] ? 1e3 : 1);
+  return v > 0 ? Math.round(v) : null;
+};
+
 export default function Composer({
   workspace,
   agentId: agentIdProp,
@@ -56,6 +72,8 @@ export default function Composer({
   const [slashIdx, setSlashIdx] = useState(0);
   const [files, setFiles] = useState<string[] | null>(null);
   const [modelMenu, setModelMenu] = useState(false);
+  // Inline context-window edit for the current model, inside the model menu.
+  const [ctxDraft, setCtxDraft] = useState<string | null>(null);
   const [effortMenu, setEffortMenu] = useState(false);
   const [rolesMenu, setRolesMenu] = useState(false);
   const [scheduleMenu, setScheduleMenu] = useState(false);
@@ -163,6 +181,22 @@ export default function Composer({
   // resolved to a concrete value shown explicitly in the UI.
   const defaultModel = resolveDefaultModel(workspace.harness, settings.defaultModels);
   const model = chatMeta?.model || defaultModel;
+  // Save the typed context-window override for the current model. Empty input
+  // clears the override; 256k/1m/纯数字 all accepted.
+  const commitCtx = () => {
+    const draft = ctxDraft;
+    setCtxDraft(null);
+    if (draft === null || !model) return;
+    const next = { ...(useApp.getState().settings.contextWindows ?? {}) };
+    const s = draft.trim();
+    if (!s) delete next[model];
+    else {
+      const n = parseTokens(s);
+      if (n == null) return;
+      next[model] = n;
+    }
+    void useApp.getState().saveSettings({ contextWindows: next });
+  };
   const modelLabel = models.find((m) => m.id === model)?.label ?? (model || 'Default');
   // The model menu lists every harness's models (grouped), not just this workspace's
   // — picking one from another harness switches the workspace to it. Ready harnesses
@@ -992,11 +1026,34 @@ export default function Composer({
                               clampEffortForModel(h.id, m.id);
                               setModelMenu(false);
                             }}
+                            hint={m.contextWindow ? fmtTokens(m.contextWindow) : undefined}
                           />
                         ))}
                       </div>
                     );
                   })}
+                {/* current model's context window — editable inline (设置 里的
+                    全局覆盖也写这里；留空清除覆盖) */}
+                {model && (
+                  <div className="border-t border-border/60 px-3 py-2">
+                    <div className="flex items-center gap-2 text-2xs text-muted">
+                      <span className="shrink-0">上下文</span>
+                      <code className="max-w-32 shrink-0 truncate font-mono text-fg">{model}</code>
+                      <input
+                        className="input h-6 w-24 font-mono text-2xs"
+                        placeholder={contextWindowForModel(model, HM) ? fmtTokens(contextWindowForModel(model, HM)) : 'tokens'}
+                        value={ctxDraft ?? ''}
+                        onChange={(e) => setCtxDraft(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') commitCtx();
+                          else if (e.key === 'Escape') setCtxDraft(null);
+                        }}
+                        onBlur={() => ctxDraft !== null && commitCtx()}
+                      />
+                      <span className="shrink-0 text-faint">256k / 1m / 纯数字</span>
+                    </div>
+                  </div>
+                )}
                 </UpMenu>
               )}
             </div>

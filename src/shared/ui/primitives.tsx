@@ -507,6 +507,7 @@ export function PickerOption({
   isDefault,
   showStar = true,
   disabled,
+  hint,
   onSelect,
   onSetDefault,
 }: {
@@ -517,6 +518,8 @@ export function PickerOption({
   showStar?: boolean;
   /** shown but not selectable (e.g. a harness whose CLI isn't installed). */
   disabled?: boolean;
+  /** right-aligned muted extra (e.g. the model's context window). */
+  hint?: React.ReactNode;
   onSelect: () => void;
   onSetDefault: () => void;
 }) {
@@ -531,6 +534,7 @@ export function PickerOption({
         {icon}
         <span className="truncate">{label}</span>
       </button>
+      {hint != null && !disabled && <span className="shrink-0 font-mono text-2xs text-faint">{hint}</span>}
       {showStar && !disabled && (
         <button
           className={clsx(
