@@ -345,3 +345,6 @@ npm run dev       # vite + electron（HMR）
   `VITE_DEV_SERVER_URL=http://localhost:5173 npx electron .`。
 - dev 数据与正式安装版隔离：设 `MAESTRO_USER_DATA=<目录>`（本机用 `.dev-user-data/`，已 gitignore）。
 - 包管理器为 npm（项目带 package-lock.json，勿用 pnpm）。
+
+### Grok 工具卡片修复
+上游 parseGrokLine 是按猜测的 schema 写的（自己标注待抓包）。已按 grok CLI 1.0.70 真实流修正：tool_call(toolCallId/toolName/rawInput)、tool_call_update(status/content/rawOutput)、text(data 增量)、end(stopReason/sessionId/usage)。工具卡片现在显示真实工具名、参数、输出，回复文本不再丢失。

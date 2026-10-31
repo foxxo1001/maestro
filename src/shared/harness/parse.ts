@@ -524,11 +524,66 @@ export function parseGrokLine(line: string): AgentEvent[] {
     }
 
     case 'tool_call': {
+      // grok >=1.0.7: {toolCallId, toolName|title, rawInput, status:'pending'}.
+      // The older guessed fields (id/name/input) stay as fallbacks.
       events.push({
         kind: 'tool-start',
-        toolId: firstStr(j.id, j.call_id, j.name) ?? 'tool',
-        name: grokNormalizeToolName(j.name ?? j.tool),
-        input: parseArgs(j.input ?? j.arguments ?? j.args),
+        toolId: firstStr(j.toolCallId, j.id, j.call_id, j.toolName) ?? 'tool',
+        name: grokNormalizeToolName(firstStr(j.toolName, j.title, j.name, j.tool)),
+        input: parseArgs(j.rawInput ?? j.input ?? j.arguments ?? j.args),
+      });
+      break;
+    }
+
+    case 'tool_call_update': {
+      // grok >=1.0.7 result streaming: {toolCallId, status, content:[{content:
+      // {type:'text',text}}], rawOutput}. Only final states finalize the card;
+      // pending/in_progress ticks are ignored (the card already shows running).
+      const status = String(j.status ?? '').toLowerCase();
+      if (!status || status === 'null' || status === 'pending' || status === 'in_progress') break;
+      const texts = Array.isArray(j.content)
+        ? j.content.map((c: any) => c?.content?.text ?? c?.text ?? '').filter(Boolean)
+        : [];
+      let summary = texts.join('\n').trim();
+      if (!summary && j.rawOutput != null) {
+        try {
+          summary = typeof j.rawOutput === 'object' ? JSON.stringify(j.rawOutput) : String(j.rawOutput);
+        } catch {}
+      }
+      events.push({
+        kind: 'tool-result',
+        toolId: firstStr(j.toolCallId, j.id) ?? 'tool',
+        ok: !/fail|error|denied|rejected/i.test(status) && !grokToolFailed(j),
+        summary: truncate(summary),
+      });
+      break;
+    }
+
+    case 'text': {
+      // grok >=1.0.7 streams assistant prose as incremental {type:'text',data}
+      // chips. seg-delta auto-opens a text segment (blocks.ts), so the chips
+      // accumulate into one block with no seg-start needed.
+      const text = firstStr(j.data, j.text, j.delta);
+      if (text) events.push({ kind: 'seg-delta', text });
+      break;
+    }
+
+    case 'usage':
+      // Mid-turn token ticks; `end` carries the authoritative usage.
+      break;
+
+    case 'end': {
+      // grok >=1.0.7 turn terminator: {stopReason, sessionId, usage}.
+      const sessionId = firstStr(j.sessionId, j.session_id);
+      if (sessionId) events.push({ kind: 'session', sessionId });
+      const ok = !j.is_error && !j.error && !/error|abort/i.test(String(j.stopReason ?? ''));
+      const u = grokUsageFrom(j.usage);
+      events.push({
+        kind: 'done',
+        ok,
+        error: ok ? undefined : firstStr(j.error?.message, j.error, j.stopReason) ?? 'grok error',
+        contextTokens: u?.contextTokens,
+        usage: u?.usage,
       });
       break;
     }
