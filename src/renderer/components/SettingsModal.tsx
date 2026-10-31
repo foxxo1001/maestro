@@ -25,6 +25,7 @@ import { hostLabel } from '../lib/hosts';
 import { timeAgo } from '../../shared/ui/format';
 import HarnessesTab, { SettingsRow, SettingsSection } from './HarnessesSettings';
 import McpTab from './McpSettings';
+import { t } from '../../shared/i18n';
 import { ThemePicker } from '../../shared/ui/ThemePicker';
 import { normalizeColorTheme } from '../../shared/themes';
 import { isEffectsMode, lowEndReason } from '../../shared/ui/effects';
@@ -78,7 +79,7 @@ export default function SettingsModal() {
       {/* The plain shell pads its body; the two-pane layout runs edge to edge. */}
       <div className="-m-6 flex h-[min(640px,72vh)]">
         <nav className="flex w-[196px] shrink-0 flex-col gap-5 overflow-y-auto border-r border-border/60 px-3 py-5">
-          <div className="px-2.5 text-[15px] font-semibold tracking-tight">Settings</div>
+          <div className="px-2.5 text-[15px] font-semibold tracking-tight">{t("Settings")}</div>
           {NAV.map((g) => (
             <div key={g.group} className="space-y-0.5">
               <div className="px-2.5 pb-1 text-2xs font-medium text-faint">{g.group}</div>
@@ -102,8 +103,8 @@ export default function SettingsModal() {
           <div className="sticky top-0 z-10 flex h-0 justify-end">
             <button
               className="btn btn-ghost mr-3 mt-3 h-8 w-8 shrink-0 !px-0 text-muted hover:text-fg"
-              title="Close"
-              aria-label="Close settings"
+              title={t("Close")}
+              aria-label={t("Close settings")}
               onClick={() => setModal(null)}
             >
               <X size={15} />
@@ -182,7 +183,7 @@ function ShortcutsTab() {
   return (
     <div className="space-y-8">
       <div className="-mt-3 flex items-center justify-between gap-4 px-1">
-        <p className="text-xs text-muted">Click a shortcut to change it. Esc cancels, ⌫ unbinds.</p>
+        <p className="text-xs text-muted">{t("Click a shortcut to change it. Esc cancels, ⌫ unbinds.")}</p>
         <button
           className="btn"
           onClick={() => {
@@ -190,8 +191,8 @@ function ShortcutsTab() {
             setRecording(null);
             setWarning(null);
           }}
-        >
-          Reset all
+        >{t("Reset all")}
+          
         </button>
       </div>
       {SHORTCUT_GROUPS.map((group) => {
@@ -216,18 +217,18 @@ function ShortcutsTab() {
                       setRecording(s.id);
                     }}
                   >
-                    {isRec ? <Kbd>Press keys…</Kbd> : cur ? <Kbd>{formatShortcut(cur, platform)}</Kbd> : <span className="text-2xs text-faint">unbound</span>}
+                    {isRec ? <Kbd>{t("Press keys…")}</Kbd> : cur ? <Kbd>{formatShortcut(cur, platform)}</Kbd> : <span className="text-2xs text-faint">{t("unbound")}</span>}
                   </button>
                   <button
                     className="btn btn-ghost text-muted opacity-0 focus-visible:opacity-100 group-hover:opacity-100"
-                    title="Reset to default"
+                    title={t("Reset to default")}
                     onClick={() => {
                       const { [s.id]: _drop, ...rest } = overrides ?? {};
                       save({ shortcuts: rest });
                       if (recording === s.id) setRecording(null);
                     }}
-                  >
-                    Reset
+                  >{t("Reset")}
+                    
                   </button>
                 </div>
               );
@@ -249,35 +250,35 @@ function GeneralTab() {
 
   return (
     <div className="space-y-8">
-      <SettingsSection title="Appearance & defaults">
+      <SettingsSection title={t("Appearance & defaults")}>
         <SettingsRow
           stack
-          label="Theme"
+          label={t("Theme")}
           description="Every theme has a light and a dark version. Maestro Web follows the theme you pick here."
         >
           <ThemePicker value={normalizeColorTheme(settings.colorTheme)} onChange={(colorTheme) => save({ colorTheme })} />
         </SettingsRow>
-        <SettingsRow label="Mode" description="Light or dark, or follow your system.">
+        <SettingsRow label={t("Mode")} description={t("Light or dark, or follow your system.")}>
           <select className="input w-48" value={settings.theme} onChange={(e) => save({ theme: e.target.value as never })}>
-            <option value="system">System</option>
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
+            <option value="system">{t("System")}</option>
+            <option value="dark">{t("Dark")}</option>
+            <option value="light">{t("Light")}</option>
           </select>
         </SettingsRow>
         <SettingsRow
-          label="Visual effects"
+          label={t("Visual effects")}
           description={
             'Glass and blur are drawn by your graphics card. Reduced swaps them for solid surfaces, which keeps Maestro smooth on older or integrated graphics.' +
             (effects === 'auto' ? (lowEnd ? ` Auto is using Reduced on this device (${lowEnd}).` : ' Auto is using Full on this device.') : '')
           }
         >
           <select className="input w-48" value={effects} onChange={(e) => save({ visualEffects: e.target.value as never })}>
-            <option value="auto">Auto</option>
-            <option value="full">Full</option>
-            <option value="reduced">Reduced</option>
+            <option value="auto">{t("Auto")}</option>
+            <option value="full">{t("Full")}</option>
+            <option value="reduced">{t("Reduced")}</option>
           </select>
         </SettingsRow>
-        <SettingsRow label="Default agent" description="Used for new conversations.">
+        <SettingsRow label={t("Default agent")} description={t("Used for new conversations.")}>
           <select
             className="input w-48"
             value={settings.defaultHarness}
@@ -292,7 +293,7 @@ function GeneralTab() {
           </select>
         </SettingsRow>
         <SettingsRow
-          label="Agent permissions"
+          label={t("Agent permissions")}
           description="Workspaces are isolated worktrees, so agents run with full access and never ask for approval — like Conductor. Runs are non-interactive: anything stricter makes blocked commands fail."
         >
           <select
@@ -300,16 +301,16 @@ function GeneralTab() {
             value={settings.permissionMode}
             onChange={(e) => save({ permissionMode: e.target.value as never })}
           >
-            <option value="bypassPermissions">Full access — no prompts (recommended)</option>
-            <option value="acceptEdits">Accept edits only (commands may fail)</option>
-            <option value="plan">Plan mode</option>
-            <option value="default">CLI default (blocks on prompts)</option>
+            <option value="bypassPermissions">{t("Full access — no prompts (recommended)")}</option>
+            <option value="acceptEdits">{t("Accept edits only (commands may fail)")}</option>
+            <option value="plan">{t("Plan mode")}</option>
+            <option value="default">{t("CLI default (blocks on prompts)")}</option>
           </select>
         </SettingsRow>
-        <SettingsRow label="Open in IDE command">
+        <SettingsRow label={t("Open in IDE command")}>
           <input
             className="input w-48 font-mono text-xs"
-            placeholder="code | cursor | subl…"
+            placeholder={t("code | cursor | subl…")}
             key={settings.ideCommand} // an "Open in" pick changes it from outside
             defaultValue={settings.ideCommand}
             onBlur={(e) => save({ ideCommand: e.target.value.trim() || 'code' })}
@@ -317,15 +318,15 @@ function GeneralTab() {
         </SettingsRow>
       </SettingsSection>
 
-      <SettingsSection title="Notifications">
+      <SettingsSection title={t("Notifications")}>
         <SettingsRow
-          label="Notify when an agent finishes or asks a question"
+          label={t("Notify when an agent finishes or asks a question")}
           description="A notification in the background, a toast when it’s another workspace, and a dock badge for workspaces waiting on you"
         >
           <Toggle checked={settings.notifications} onChange={(v) => save({ notifications: v })} />
         </SettingsRow>
         <SettingsRow
-          label="Completion sound"
+          label={t("Completion sound")}
           description="Plays when an agent finishes working in a chat — modelled on real instruments and synthesized live, so it works offline."
         >
           <select
@@ -336,7 +337,7 @@ function GeneralTab() {
               playCompletionSound(e.target.value); // preview the pick immediately
             }}
           >
-            <option value="none">No sound</option>
+            <option value="none">{t("No sound")}</option>
             {SOUND_GROUP_ORDER.map((group) => (
               <optgroup key={group} label={group}>
                 {COMPLETION_SOUNDS.filter((s) => s.group === group).map((s) => (
@@ -351,14 +352,14 @@ function GeneralTab() {
             className="btn btn-ghost h-8 w-8 shrink-0 !px-0"
             disabled={settings.completionSound === 'none'}
             onClick={() => playCompletionSound(settings.completionSound)}
-            title="Play the selected sound"
-            aria-label="Test sound"
+            title={t("Play the selected sound")}
+            aria-label={t("Test sound")}
           >
             <Volume2 size={14} />
           </button>
         </SettingsRow>
         <SettingsRow
-          label="Question alert"
+          label={t("Question alert")}
           description="A distinct rising chime when an agent stops to ask you something — it can't continue until you answer."
         >
           <Toggle
@@ -372,17 +373,17 @@ function GeneralTab() {
             className="btn btn-ghost h-8 w-8 shrink-0 !px-0"
             disabled={!settings.questionSound}
             onClick={() => playQuestionSound()}
-            title="Play the question alert"
-            aria-label="Test question alert"
+            title={t("Play the question alert")}
+            aria-label={t("Test question alert")}
           >
             <Volume2 size={14} />
           </button>
         </SettingsRow>
       </SettingsSection>
 
-      <SettingsSection title="Automation">
+      <SettingsSection title={t("Automation")}>
         <SettingsRow
-          label="Refine my prompts before sending"
+          label={t("Refine my prompts before sending")}
           description="Clearer & more token-efficient, keeps every detail (uses your harness’s fastest model)."
         >
           <Toggle checked={settings.refinePrompt} onChange={(v) => save({ refinePrompt: v })} />
@@ -394,28 +395,28 @@ function GeneralTab() {
           <Toggle checked={settings.autoStatus} onChange={(v) => save({ autoStatus: v })} />
         </SettingsRow>
         <SettingsRow
-          label="Auto-detect run & test scripts"
+          label={t("Auto-detect run & test scripts")}
           description="Uses AI when a workspace's Run tab first opens."
         >
           <Toggle checked={settings.autoDetectRunScripts} onChange={(v) => save({ autoDetectRunScripts: v })} />
         </SettingsRow>
         <SettingsRow
-          label="Memory guard"
+          label={t("Memory guard")}
           description="Stop a process an agent started when it is about to use up this machine's memory."
         >
           <Toggle checked={settings.memoryGuard !== false} onChange={(v) => save({ memoryGuard: v })} />
         </SettingsRow>
       </SettingsSection>
 
-      <SettingsSection title="Storage">
+      <SettingsSection title={t("Storage")}>
         <SettingsRow
-          label="Free disk space for archived workspaces"
+          label={t("Free disk space for archived workspaces")}
           description="Clears an archived workspace's files, keeping its branch, uncommitted changes and local files. Restoring brings everything back."
         >
           <Toggle checked={settings.freeArchivedFiles !== false} onChange={(v) => save({ freeArchivedFiles: v })} />
         </SettingsRow>
         <SettingsRow
-          label="Reuse dependencies between workspaces"
+          label={t("Reuse dependencies between workspaces")}
           description="New workspaces start with node_modules cloned from a sibling with the same lockfile — near-instant, and no extra disk."
         >
           <Toggle checked={settings.reuseDependencies !== false} onChange={(v) => save({ reuseDependencies: v })} />
@@ -423,7 +424,7 @@ function GeneralTab() {
       </SettingsSection>
 
       <SettingsSection
-        title="Detected agents"
+        title={t("Detected agents")}
         description="Agent CLIs use whatever login they already have (API key or subscription). Maestro never stores or manages model API keys."
       >
         {harnesses.map((h) => (
@@ -499,7 +500,7 @@ function SoftwareUpdate() {
 
   const status = outcome && describeUpdateOutcome(outcome);
   return (
-    <SettingsSection title="Software update">
+    <SettingsSection title={t("Software update")}>
       <div className="px-4 py-3.5">
         <div className="flex items-center justify-between gap-6">
           <div className="min-w-0">
@@ -507,7 +508,7 @@ function SoftwareUpdate() {
               <img src={maestroLogo} alt="" className="h-5 w-5" />
               {version ? `Maestro v${version}` : 'Maestro'}
             </div>
-            <div className="mt-0.5 text-2xs text-muted">Updates download and install automatically.</div>
+            <div className="mt-0.5 text-2xs text-muted">{t("Updates download and install automatically.")}</div>
           </div>
           <button className="btn h-8 shrink-0 px-3.5" onClick={check} disabled={checking}>
             {checking ? <Spinner /> : <RefreshCw size={13} />}
@@ -562,7 +563,7 @@ function ProjectRunsOn({ project }: { project: Project }) {
 
   return (
     <SettingsRow
-      label="New conversations run"
+      label={t("New conversations run")}
       description="Applies to conversations you create from now on, and every one is still overridable in the new-conversation picker. Existing conversations stay where they are."
     >
       <select className="input w-60" value={project.cloudHostId ?? ''} onChange={(e) => void save(e.target.value || null)}>
@@ -616,17 +617,17 @@ function RepositoryTab() {
 
   return (
     <div className="space-y-8">
-      <p className="-mt-3 px-1 text-xs text-muted">
-        Stored in <code className="font-mono">.maestro/settings.toml</code> inside{' '}
-        <code className="font-mono">{project.name}</code> — commit it to share with your team.
+      <p className="-mt-3 px-1 text-xs text-muted">{t("Stored in")}
+         <code className="font-mono">.maestro/settings.toml</code> inside{' '}
+        <code className="font-mono">{project.name}</code>{t("— commit it to share with your team.")} 
       </p>
-      <SettingsSection title="Agents">
+      <SettingsSection title={t("Agents")}>
         {/* Setup script restores ignored files a fresh worktree lacks — meaningless
             for an in-place folder (it already has them), so hidden for folder projects. */}
         {caps.git && (
           <SettingsRow
             stack
-            label="Setup script"
+            label={t("Setup script")}
             description="Runs once per new workspace. Worktrees only carry git-tracked files — restore .env, deps and local DBs here."
           >
             <textarea
@@ -637,23 +638,23 @@ function RepositoryTab() {
             />
           </SettingsRow>
         )}
-        <SettingsRow stack label="Instructions" description="Durable guidance for every agent.">
+        <SettingsRow stack label={t("Instructions")} description={t("Durable guidance for every agent.")}>
           <textarea
             className="input h-24 text-xs"
-            placeholder="Conventions, test commands, gotchas…"
+            placeholder={t("Conventions, test commands, gotchas…")}
             value={repo.instructions}
             onChange={(e) => setRepo({ ...repo, instructions: e.target.value })}
           />
         </SettingsRow>
         <div className="px-4 py-3 text-2xs text-muted">
-          Run &amp; test scripts moved to the <span className="font-medium text-fg">Run</span> tab in the workspace
+          Run &amp; test scripts moved to the <span className="font-medium text-fg">{t("Run")}</span> tab in the workspace
           dock — they're auto-detected with AI and editable there, no repo settings needed.
         </div>
       </SettingsSection>
       {(caps.git || (caps.worktrees && !project.hostId)) && (
         <SettingsSection title="Branches & hosting">
           {caps.git && (
-            <SettingsRow label="Base branch">
+            <SettingsRow label={t("Base branch")}>
               <input className="input w-48 font-mono text-xs" value={baseBranch} onChange={(e) => setBaseBranch(e.target.value)} />
             </SettingsRow>
           )}
@@ -715,10 +716,10 @@ function MaestroCloudCard() {
     const d = r.data;
     if (r.error || (d && !d.ok && !d.waitlisted && !d.full)) return toast('error', r.error || d?.error || 'Join failed');
     if (d?.waitlisted) return toast('error', 'You’re on the waitlist — Maestro Cloud is at capacity.');
-    if (d?.full) return toast('error', 'Maestro Cloud is full right now — try again later, or use your own server.');
+    if (d?.full) return toast('error', t("Maestro Cloud is full right now — try again later, or use your own server."));
     if (d?.ok) {
       useApp.getState().refreshHosts?.();
-      toast('success', 'Joined Maestro Cloud — sign into your harness in the readiness panel.');
+      toast('success', t("Joined Maestro Cloud — sign into your harness in the readiness panel."));
     }
   };
   const leave = async () => {
@@ -728,15 +729,15 @@ function MaestroCloudCard() {
     setBusy(false);
     if (r.error || r.data?.ok === false) return toast('error', r.error || r.data?.error || 'Leave failed');
     useApp.getState().refreshHosts?.();
-    toast('success', 'Left Maestro Cloud.');
+    toast('success', t("Left Maestro Cloud."));
   };
 
   return (
     <SettingsSection
       title={
-        <span className="flex items-center gap-2">
-          Maestro Cloud
-          <span className="rounded-full bg-accent-tint px-2 py-0.5 text-[10px] font-medium text-accent">Free beta</span>
+        <span className="flex items-center gap-2">{t("Maestro Cloud")}
+          
+          <span className="rounded-full bg-accent-tint px-2 py-0.5 text-[10px] font-medium text-accent">{t("Free beta")}</span>
         </span>
       }
       action={
@@ -761,7 +762,7 @@ function MaestroCloudCard() {
           <div className="flex items-center gap-2">
             <input
               className="input h-8 flex-1 text-xs"
-              placeholder="invite code (if you have one)"
+              placeholder={t("invite code (if you have one)")}
               value={invite}
               onChange={(e) => setInvite(e.target.value)}
             />
@@ -811,7 +812,7 @@ function KubernetesCard() {
   };
 
   const add = async () => {
-    if (!context) return toast('error', 'Pick a context first.');
+    if (!context) return toast('error', t("Pick a context first."));
     setBusy(true);
     const r = await tryInvoke('k8s:addCluster', { context, namespace: namespace.trim() || 'maestro', image: image.trim() || undefined });
     setBusy(false);
@@ -819,7 +820,7 @@ function KubernetesCard() {
     await useApp.getState().refreshHosts?.();
     setAdding(false);
     setImage('');
-    toast('success', 'Cluster added — the workspace node is created on first use.');
+    toast('success', t("Cluster added — the workspace node is created on first use."));
   };
 
   const check = async (hostId: string) => {
@@ -843,11 +844,11 @@ function KubernetesCard() {
 
   return (
     <SettingsSection
-      title="Kubernetes clusters"
+      title={t("Kubernetes clusters")}
       action={
         !adding && (
-          <button className="btn shrink-0" onClick={() => void openAdd()}>
-            Add Kubernetes cluster…
+          <button className="btn shrink-0" onClick={() => void openAdd()}>{t("Add Kubernetes cluster…")}
+            
           </button>
         )
       }
@@ -875,8 +876,8 @@ function KubernetesCard() {
               <button className="btn shrink-0" disabled={checking === h.id} onClick={() => void check(h.id)}>
                 {checking === h.id ? <Spinner /> : 'Check'}
               </button>
-              <button className="btn btn-ghost shrink-0 text-muted" onClick={() => void detach(h.id, h.label)}>
-                Detach
+              <button className="btn btn-ghost shrink-0 text-muted" onClick={() => void detach(h.id, h.label)}>{t("Detach")}
+                
               </button>
             </div>
             {rows[h.id] && (
@@ -898,9 +899,9 @@ function KubernetesCard() {
           ) : (
             <>
               <div>
-                <label className="label">Context</label>
+                <label className="label">{t("Context")}</label>
                 <select className="input" value={context} onChange={(e) => setContext(e.target.value)}>
-                  <option value="">Pick a kubeconfig context…</option>
+                  <option value="">{t("Pick a kubeconfig context…")}</option>
                   {contexts.map((c) => (
                     <option key={c.name} value={c.name}>
                       {c.name}
@@ -911,14 +912,14 @@ function KubernetesCard() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="label">Namespace</label>
+                  <label className="label">{t("Namespace")}</label>
                   <input className="input font-mono text-xs" value={namespace} onChange={(e) => setNamespace(e.target.value)} />
                 </div>
                 <div>
-                  <label className="label">Image (optional)</label>
+                  <label className="label">{t("Image (optional)")}</label>
                   <input
                     className="input font-mono text-xs"
-                    placeholder="default workspace node"
+                    placeholder={t("default workspace node")}
                     value={image}
                     onChange={(e) => setImage(e.target.value)}
                   />
@@ -927,10 +928,10 @@ function KubernetesCard() {
             </>
           )}
           <div className="flex items-center justify-between gap-3">
-            <p className="text-2xs text-muted">The node is one pod: parallel agents share its CPU and memory, like any box.</p>
+            <p className="text-2xs text-muted">{t("The node is one pod: parallel agents share its CPU and memory, like any box.")}</p>
             <div className="flex shrink-0 gap-2">
-              <button className="btn btn-ghost text-muted" onClick={() => setAdding(false)}>
-                Cancel
+              <button className="btn btn-ghost text-muted" onClick={() => setAdding(false)}>{t("Cancel")}
+                
               </button>
               <button className="btn btn-accent" disabled={busy || !context} onClick={() => void add()}>
                 {busy ? <Spinner /> : 'Add cluster'}
@@ -966,7 +967,7 @@ function CloudTab() {
   };
 
   const moveAll = async () => {
-    if (!cloud.hostId) return toast('error', 'Pick a server first.');
+    if (!cloud.hostId) return toast('error', t("Pick a server first."));
     if (!confirm(`Move ${eligible.length} conversation(s) to your server?\n\n${MOVE_COST}`)) return;
     setMoving(true);
     for (const w of eligible) await tryInvoke('workspace:setCloud', { workspaceId: w.id, hostId: cloud.hostId });
@@ -977,16 +978,16 @@ function CloudTab() {
   return (
     <div className="space-y-8">
       <MaestroCloudCard />
-      <SettingsSection title="Your server">
+      <SettingsSection title={t("Your server")}>
         <SettingsRow
-          label="Run new conversations in the cloud"
+          label={t("Run new conversations in the cloud")}
           description="New workspaces default to Cloud on your server; you can flip each one."
         >
           <Toggle checked={cloud.defaultOn} onChange={(v) => save({ defaultOn: v })} />
         </SettingsRow>
         <SettingsRow
           stack
-          label="Server"
+          label={t("Server")}
           description="A cloud conversation runs on this always-on box (the same connect + harness-install flow as an SSH project). Close the app: the turn finishes, queued messages drain, dev servers keep serving — you catch up on return."
         >
           <div className="flex items-center gap-2">
@@ -996,7 +997,7 @@ function CloudTab() {
               value={cloud.hostId ?? ''}
               onChange={(e) => save({ hostId: e.target.value || null })}
             >
-              <option value="">No server selected</option>
+              <option value="">{t("No server selected")}</option>
               {hosts.map((h) => (
                 <option key={h.id} value={h.id}>
                   {hostLabel(h)}
@@ -1008,7 +1009,7 @@ function CloudTab() {
             </button>
           </div>
         </SettingsRow>
-        <SettingsRow label="Move all conversations to your server" description={MOVE_COST}>
+        <SettingsRow label={t("Move all conversations to your server")} description={MOVE_COST}>
           <button
             className="btn btn-accent shrink-0"
             disabled={moving || !eligible.length || !cloud.hostId}
@@ -1074,7 +1075,7 @@ function AccountTab() {
         setCode(null);
         if (e.status) setStatus(e.status);
         else refresh();
-        toast('success', 'Maestro Web linked.');
+        toast('success', t("Maestro Web linked."));
       } else if (e.phase === 'error') {
         setCode(null);
         toast('error', e.message || 'Linking failed.');
@@ -1103,7 +1104,7 @@ function AccountTab() {
     const r = await tryInvoke('account:deviceUnlink', { deviceId });
     setBusy(null);
     if (!r.data?.ok) toast('error', r.data?.error || r.error || 'Could not unlink that device.');
-    else toast('success', 'Device unlinked.');
+    else toast('success', t("Device unlinked."));
     refresh();
   };
   const resync = async () => {
@@ -1145,8 +1146,8 @@ function AccountTab() {
                 setLoadError(false);
                 refresh();
               }}
-            >
-              Retry
+            >{t("Retry")}
+              
             </button>
           </div>
         ) : (
@@ -1157,18 +1158,18 @@ function AccountTab() {
 
   return (
     <div className="space-y-8">
-      <SettingsSection title="Maestro Web">
+      <SettingsSection title={t("Maestro Web")}>
         {(relayDown || busDegraded) && (
           <div className="space-y-1 bg-warn/10 px-4 py-2.5 text-2xs text-warn">
             {relayDown && (
               <div>Maestro Web relay unavailable — {relayDown} Publishing is paused and will resume automatically.</div>
             )}
-            {busDegraded && <div>Relay running without its event bus — live features degraded.</div>}
+            {busDegraded && <div>{t("Relay running without its event bus — live features degraded.")}</div>}
           </div>
         )}
         {!status.linked && !code && !confirming && (
           <SettingsRow
-            label="Link this desktop"
+            label={t("Link this desktop")}
             description={
               <>
                 See your fleet from your phone: sign in at{' '}
@@ -1177,18 +1178,18 @@ function AccountTab() {
               </>
             }
           >
-            <button className="btn btn-accent h-8 px-3.5" onClick={() => setConfirming(true)}>
-              Link Maestro Web
+            <button className="btn btn-accent h-8 px-3.5" onClick={() => setConfirming(true)}>{t("Link Maestro Web")}
+              
             </button>
           </SettingsRow>
         )}
         {!status.linked && !code && confirming && (
           <SettingsRow
-            label="Confirm what syncs"
+            label={t("Confirm what syncs")}
             description="Linking uploads the conversations, transcripts, and diffs of every project selected below to Maestro Web."
           >
-            <button className="btn btn-ghost text-muted" onClick={() => setConfirming(false)}>
-              Cancel
+            <button className="btn btn-ghost text-muted" onClick={() => setConfirming(false)}>{t("Cancel")}
+              
             </button>
             <button className="btn btn-accent h-8 px-3.5" disabled={busy === 'link'} onClick={() => void startLink()}>
               {busy === 'link' ? <Spinner /> : 'Confirm & link'}
@@ -1197,12 +1198,12 @@ function AccountTab() {
         )}
         {code && (
           <div className="px-4 py-5 text-center text-2xs">
-            <p className="text-muted">
-              Open <code className="font-mono">{code.url.replace(/^https?:\/\//, '')}</code> on any device (signed in with
+            <p className="text-muted">{t("Open")}
+               <code className="font-mono">{code.url.replace(/^https?:\/\//, '')}</code> on any device (signed in with
               GitHub) and enter this code:
             </p>
             <div className="my-3 select-all font-mono text-2xl font-medium tracking-[0.3em]">{code.code}</div>
-            <p className="text-faint">Waiting for approval…</p>
+            <p className="text-faint">{t("Waiting for approval…")}</p>
           </div>
         )}
         {status.linked && !code && (
@@ -1232,13 +1233,13 @@ function AccountTab() {
               <button className="btn" disabled={busy === 'link'} onClick={() => void startLink()}>
                 {busy === 'link' ? <Spinner /> : 'Link another device'}
               </button>
-              <button className="btn btn-ghost text-muted" onClick={() => void signOut()}>
-                Sign out
+              <button className="btn btn-ghost text-muted" onClick={() => void signOut()}>{t("Sign out")}
+                
               </button>
             </SettingsRow>
             <SettingsRow
-              label="Re-sync all"
-              description="Missing workspaces on the web? Push every workspace and its history up again."
+              label={t("Re-sync all")}
+              description={t("Missing workspaces on the web? Push every workspace and its history up again.")}
             >
               <button className="btn" disabled={busy === 'resync'} onClick={() => void resync()}>
                 {busy === 'resync' ? <Spinner /> : 'Re-sync all'}
@@ -1249,13 +1250,13 @@ function AccountTab() {
       </SettingsSection>
 
       {status.linked && !code && status.devices.length > 0 && (
-        <SettingsSection title="Linked desktops">
+        <SettingsSection title={t("Linked desktops")}>
           {status.devices.map((d) => (
             <div key={d.id} className="flex items-center justify-between gap-4 px-4 py-3">
               <span className="min-w-0">
                 <span className="block truncate text-[13px] font-medium">
                   {d.name || 'Desktop'}
-                  {d.current && <span className="font-normal text-muted"> · this device</span>}
+                  {d.current && <span className="font-normal text-muted">{t("· this device")} </span>}
                 </span>
                 <span className="block truncate text-2xs text-muted">
                   {[d.platform, d.lastSeenAt ? `last seen ${timeAgo(new Date(d.lastSeenAt).getTime())}` : null]
@@ -1266,8 +1267,8 @@ function AccountTab() {
               {d.current ? null : busy === `dev:${d.id}` ? (
                 <Spinner />
               ) : (
-                <button className="btn shrink-0" onClick={() => void unlinkDevice(d.id)}>
-                  Unlink
+                <button className="btn shrink-0" onClick={() => void unlinkDevice(d.id)}>{t("Unlink")}
+                  
                 </button>
               )}
             </div>
@@ -1277,7 +1278,7 @@ function AccountTab() {
 
       {(confirming || code || status.linked) && projects.length > 0 && (
         <SettingsSection
-          title="Projects to sync"
+          title={t("Projects to sync")}
           description={
             <>
               Choose which projects reach Maestro Web. Every project syncs by default — deselect any you'd rather keep
@@ -1306,10 +1307,10 @@ function AccountTab() {
 
       {status.linked && (
         <SettingsSection
-          title="Keep servers running when this desktop is closed"
+          title={t("Keep servers running when this desktop is closed")}
           description="Your conversations already reach your phone whenever this desktop is linked — this is separate. Turn it on for a server and its cloud tasks keep running (and stay send/stoppable from your phone) even with the desktop closed; turn one off to require this desktop to be open. On by default for every server. Uploads a small POSIX shell loop (maestro-sync) over the SSH connection you already trust — outbound HTTPS only."
         >
-          {hosts.length === 0 && <p className="px-4 py-3 text-2xs text-muted">No saved servers yet.</p>}
+          {hosts.length === 0 && <p className="px-4 py-3 text-2xs text-muted">{t("No saved servers yet.")}</p>}
           {hosts.map((h) => {
             const box = status.boxes[h.id];
             return (
@@ -1364,7 +1365,7 @@ function IntegrationsTab() {
         description="One sign-in covers the GitHub CLI (PRs, checks, cloning) and git pushes — the token lives in gh's keyring, never in Maestro."
       >
         <SettingsRow
-          label="GitHub CLI"
+          label={t("GitHub CLI")}
           description={
             gh.authenticated ? (
               <span className="text-ok">Signed in as @{gh.user}</span>
@@ -1387,27 +1388,27 @@ function IntegrationsTab() {
             {checking ? <Spinner /> : 'Re-check'}
           </button>
           {gh.authenticated ? (
-            <button className="btn" onClick={() => void useApp.getState().signOutGithub()}>
-              Sign out
+            <button className="btn" onClick={() => void useApp.getState().signOutGithub()}>{t("Sign out")}
+              
             </button>
           ) : (
             <button className="btn btn-accent" onClick={() => void useApp.getState().startGithubSignIn()}>
-              <GitHubMark size={14} />
-              Sign in with GitHub
+              <GitHubMark size={14} />{t("Sign in with GitHub")}
+              
             </button>
           )}
         </SettingsRow>
       </SettingsSection>
 
-      <SettingsSection title="Linear">
+      <SettingsSection title={t("Linear")}>
         <SettingsRow
-          label="Personal API key"
+          label={t("Personal API key")}
           description='Enables "New workspace → from Linear issue". The token is stored locally only.'
         >
           <input
             className="input w-56 font-mono text-xs"
             type="password"
-            placeholder="lin_api_…  (personal API key)"
+            placeholder={t("lin_api_…  (personal API key)")}
             defaultValue={settings.linearToken}
             onBlur={(e) => void useApp.getState().saveSettings({ linearToken: e.target.value.trim() })}
           />
@@ -1416,14 +1417,14 @@ function IntegrationsTab() {
 
       {(hsDetected || hsEnabled) && (
         <SettingsSection
-          title="Sync chats from Claude Code & Codex"
+          title={t("Sync chats from Claude Code & Codex")}
           description="Read-only: Maestro tails your Claude Code & Codex transcripts so chats you start in either tool appear here and stay in sync. Your files are never modified."
         >
-          <SettingsRow label="Enabled">
+          <SettingsRow label={t("Enabled")}>
             <Toggle checked={hsEnabled} onChange={toggleHs} />
           </SettingsRow>
           <SettingsRow
-            label="Status"
+            label={t("Status")}
             description={
               hsStatus
                 ? `${hsStatus.mirrored} chat${hsStatus.mirrored === 1 ? '' : 's'} mirrored` +
@@ -1431,8 +1432,8 @@ function IntegrationsTab() {
                 : 'Not scanned yet.'
             }
           >
-            <button className="btn" onClick={() => setModal({ kind: 'harness-sync' })}>
-              Scan now…
+            <button className="btn" onClick={() => setModal({ kind: 'harness-sync' })}>{t("Scan now…")}
+              
             </button>
           </SettingsRow>
         </SettingsSection>

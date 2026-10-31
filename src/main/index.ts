@@ -379,7 +379,7 @@ function editMenu(): Electron.MenuItemConstructorOptions {
   if (process.platform === 'darwin') return { role: 'editMenu' };
   const page = { registerAccelerator: false } as const;
   return {
-    label: 'Edit',
+    label: '编辑',
     submenu: [
       { role: 'undo', ...page },
       { role: 'redo', ...page },
@@ -405,7 +405,7 @@ function editMenu(): Electron.MenuItemConstructorOptions {
 function windowMenu(): Electron.MenuItemConstructorOptions {
   if (process.platform === 'darwin') return { role: 'windowMenu' };
   return {
-    label: 'Window',
+    label: '窗口',
     submenu: [{ role: 'minimize' }, { role: 'close', accelerator: 'CmdOrCtrl+Shift+W' }],
   };
 }
@@ -421,9 +421,9 @@ function buildMenu() {
       submenu: [
         { role: 'about' },
         { type: 'separator' },
-        { label: 'Check for Updates…', click: () => void checkForUpdatesFromMenu() },
+        { label: '检查更新…', click: () => void checkForUpdatesFromMenu() },
         { type: 'separator' },
-        { label: 'Settings…', accelerator: keys.settings ?? undefined, click: menuAction('settings') },
+        { label: '设置…', accelerator: keys.settings ?? undefined, click: menuAction('settings') },
         { type: 'separator' },
         { role: 'services' },
         { type: 'separator' },
@@ -435,48 +435,48 @@ function buildMenu() {
       ],
     },
     {
-      label: 'File',
+      label: '文件',
       submenu: [
-        { label: 'New Workspace (Branch)', accelerator: keys['new-workspace'] ?? undefined, click: menuAction('new-workspace') },
-        { label: 'New Chat', accelerator: keys['new-chat'] ?? undefined, click: menuAction('new-chat') },
-        { label: 'Reopen Closed Tab', accelerator: keys['reopen-tab'] ?? undefined, click: menuAction('reopen-tab') },
+        { label: '新建工作区（分支）', accelerator: keys['new-workspace'] ?? undefined, click: menuAction('new-workspace') },
+        { label: '新会话', accelerator: keys['new-chat'] ?? undefined, click: menuAction('new-chat') },
+        { label: '重新打开已关闭的标签页', accelerator: keys['reopen-tab'] ?? undefined, click: menuAction('reopen-tab') },
         { type: 'separator' },
-        { label: 'Open Project…', click: menuAction('open-project') },
-        { label: 'Open GitHub Project…', click: menuAction('clone-repo') },
-        { label: 'Quick Start Project…', click: menuAction('create-project') },
+        { label: '打开项目…', click: menuAction('open-project') },
+        { label: '打开 GitHub 项目…', click: menuAction('clone-repo') },
+        { label: '快速开始项目…', click: menuAction('create-project') },
         { type: 'separator' },
         // ⌘W / Ctrl+W closes the active chat tab, not the window (single-window
         // app — closing the window would quit). ⌘⇧W still closes the window; the
         // Window menu must not re-bind ⌘W over this one (see windowMenu()).
-        { label: 'Close Tab', accelerator: keys['close-tab'] ?? undefined, click: menuAction('close-tab') },
+        { label: '关闭标签页', accelerator: keys['close-tab'] ?? undefined, click: menuAction('close-tab') },
         { role: 'close', accelerator: 'CmdOrCtrl+Shift+W' },
       ],
     },
     editMenu(),
     {
-      label: 'View',
+      label: '视图',
       submenu: [
-        { label: 'Command Palette', accelerator: keys.palette ?? undefined, click: menuAction('palette') },
+        { label: '命令面板', accelerator: keys.palette ?? undefined, click: menuAction('palette') },
         { type: 'separator' },
-        { label: 'Focus Composer', accelerator: keys['focus-composer'] ?? undefined, click: menuAction('focus-composer') },
-        { label: 'Chat', accelerator: keys['tab-chat'] ?? undefined, click: menuAction('tab-chat') },
+        { label: '聚焦输入框', accelerator: keys['focus-composer'] ?? undefined, click: menuAction('focus-composer') },
+        { label: '会话', accelerator: keys['tab-chat'] ?? undefined, click: menuAction('tab-chat') },
         // ⌘J (was ⇧⌘T, now reassigned to Reopen Closed Tab).
-        { label: 'Terminal', accelerator: keys['tab-terminal'] ?? undefined, click: menuAction('tab-terminal') },
-        { label: 'Diff Viewer', accelerator: keys['tab-diff'] ?? undefined, click: menuAction('tab-diff') },
-        { label: 'Editor', accelerator: keys['tab-editor'] ?? undefined, click: menuAction('tab-editor') },
+        { label: '终端', accelerator: keys['tab-terminal'] ?? undefined, click: menuAction('tab-terminal') },
+        { label: 'Diff 查看器', accelerator: keys['tab-diff'] ?? undefined, click: menuAction('tab-diff') },
+        { label: '编辑器', accelerator: keys['tab-editor'] ?? undefined, click: menuAction('tab-editor') },
         // ⌘⇧P is taken by Create Pull Request, so Preview uses ⌘⇧B (spec §5.1).
-        { label: 'Preview', accelerator: keys['tab-preview'] ?? undefined, click: menuAction('tab-preview') },
+        { label: '预览', accelerator: keys['tab-preview'] ?? undefined, click: menuAction('tab-preview') },
         { type: 'separator' },
-        { label: 'Toggle Theme', click: menuAction('toggle-theme') },
+        { label: '切换主题', click: menuAction('toggle-theme') },
         { type: 'separator' },
         // Not the built-in zoom roles: those forget the level on quit and can't
         // keep the window controls, minimum size and preview view in step (see
         // services/zoom). "Plus" is literally ⇧= to Chromium, so bare ⌘/Ctrl+=
         // gets a hidden twin — a hidden item keeps its accelerator registered.
-        { label: 'Zoom In', accelerator: keys['zoom-in'] ?? undefined, click: () => nudgeZoom(ZOOM_STEP) },
-        { label: 'Zoom In', accelerator: 'CmdOrCtrl+=', click: () => nudgeZoom(ZOOM_STEP), visible: false },
-        { label: 'Zoom Out', accelerator: keys['zoom-out'] ?? undefined, click: () => nudgeZoom(-ZOOM_STEP) },
-        { label: 'Actual Size', accelerator: keys['zoom-reset'] ?? undefined, click: () => setZoom(0) },
+        { label: '放大', accelerator: keys['zoom-in'] ?? undefined, click: () => nudgeZoom(ZOOM_STEP) },
+        { label: '放大', accelerator: 'CmdOrCtrl+=', click: () => nudgeZoom(ZOOM_STEP), visible: false },
+        { label: '缩小', accelerator: keys['zoom-out'] ?? undefined, click: () => nudgeZoom(-ZOOM_STEP) },
+        { label: '实际大小', accelerator: keys['zoom-reset'] ?? undefined, click: () => setZoom(0) },
         { type: 'separator' },
         { role: 'reload' },
         { role: 'toggleDevTools' },
@@ -485,13 +485,13 @@ function buildMenu() {
       ],
     },
     {
-      label: 'Workspace',
+      label: '工作区',
       submenu: [
-        { label: 'Create Pull Request', accelerator: keys['create-pr'] ?? undefined, click: menuAction('create-pr') },
-        { label: 'Archive Workspace', click: menuAction('archive') },
+        { label: '创建 Pull Request', accelerator: keys['create-pr'] ?? undefined, click: menuAction('create-pr') },
+        { label: '归档工作区', click: menuAction('archive') },
         { type: 'separator' },
         ...Array.from({ length: 9 }, (_, i) => ({
-          label: `Workspace ${i + 1}`,
+          label: `工作区 ${i + 1}`,
           accelerator: `CmdOrCtrl+${i + 1}`,
           click: menuAction(`workspace-${i + 1}`),
         })),

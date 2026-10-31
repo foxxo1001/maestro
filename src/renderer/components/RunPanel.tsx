@@ -8,6 +8,7 @@ import { useApp } from '../store/app';
 import { Spinner } from './common';
 import { StainedDot } from '../../shared/ui/StainedGlass';
 import { RunTimer } from './RunTimer';
+import { t } from '../../shared/i18n';
 
 /**
  * The Run tab (right-panel dock): this branch's run/test script cards, one
@@ -83,7 +84,7 @@ export default function RunPanel({ workspace }: { workspace: Workspace }) {
       </div>
 
       <div className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-2 pb-2">
-        {!scripts && <div className="px-2.5 py-2 text-xs text-faint">Loading…</div>}
+        {!scripts && <div className="px-2.5 py-2 text-xs text-faint">{t("Loading…")}</div>}
         {scripts?.length === 0 && generating && (
           <div className="mx-1 flex items-center gap-2 rounded-card bg-accent-soft px-4 py-3.5 text-xs text-muted">
             <Spinner /> Detecting run & test scripts for this {scope}…

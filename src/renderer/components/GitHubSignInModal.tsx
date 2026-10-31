@@ -3,6 +3,7 @@ import { AlertCircle, Check, Copy, ExternalLink } from 'lucide-react';
 import { useApp } from '../store/app';
 import { Modal, Spinner } from './common';
 import { copyText } from '../lib/clipboard';
+import { t } from '../../shared/i18n';
 
 /**
  * OAuth device-flow sign-in: show the one-time code, send the user to
@@ -28,7 +29,7 @@ export default function GitHubSignInModal() {
 
   return (
     <Modal
-      title="Sign in with GitHub"
+      title={t("Sign in with GitHub")}
       onClose={cancel}
       width={460}
       footer={
@@ -36,8 +37,8 @@ export default function GitHubSignInModal() {
           <span className="mr-auto text-2xs text-faint">
             Prefer a terminal? <code className="font-mono">gh auth login</code> works too.
           </span>
-          <button className="btn btn-ghost text-muted hover:text-fg" onClick={cancel}>
-            Cancel
+          <button className="btn btn-ghost text-muted hover:text-fg" onClick={cancel}>{t("Cancel")}
+            
           </button>
         </>
       }
@@ -53,8 +54,8 @@ export default function GitHubSignInModal() {
             <AlertCircle size={15} className="mt-px shrink-0" />
             <span>{st.message}</span>
           </div>
-          <button className="btn btn-accent" onClick={() => void useApp.getState().startGithubSignIn()}>
-            Try again
+          <button className="btn btn-accent" onClick={() => void useApp.getState().startGithubSignIn()}>{t("Try again")}
+            
           </button>
         </div>
       ) : (

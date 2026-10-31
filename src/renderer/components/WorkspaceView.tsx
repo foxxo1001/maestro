@@ -34,6 +34,7 @@ import { useShortcuts } from '../lib/shortcuts';
 import ChatPanel from './ChatPanel';
 import DiffViewer from './DiffViewer';
 import RunScriptEditor from './RunScriptEditor';
+import { t } from '../../shared/i18n';
 
 // The whole editor surface (Monaco + notebook renderer) is a lazy chunk — its
 // parse cost is paid on first file open, never at app startup.
@@ -152,7 +153,7 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
                   className="flex shrink-0 items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 text-2xs font-medium text-muted"
                   title="Adopted from Conductor — Maestro opened this existing worktree in place. Deleting the workspace here never removes the directory."
                 >
-                  <DownloadCloud size={10} /> adopted
+                  <DownloadCloud size={10} />{t("adopted")} 
                 </span>
               )}
             </>
@@ -162,12 +163,12 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
               title="Agents work directly in this folder — no branches or diffs. They have direct access under the current permission mode."
             >
               <FolderOpen size={11} className="shrink-0" />
-              <span className="truncate">in-place · direct access</span>
+              <span className="truncate">{t("in-place · direct access")}</span>
             </span>
           )}
           {workspace.setupError && (
-            <span className="truncate text-2xs text-err" title={workspace.setupError}>
-              setup failed
+            <span className="truncate text-2xs text-err" title={workspace.setupError}>{t("setup failed")}
+              
             </span>
           )}
         </div>
@@ -215,7 +216,7 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
               />
               <LiquidGlass radius={999} {...GLASS_CONTROL} tint="clear" className="lg-float flex items-center p-[3px]">
                 <OpenInButton workspaceId={workspace.id} />
-                <HeaderBtn title="Reveal in Finder" onClick={() => void tryInvoke('workspace:reveal', { workspaceId: workspace.id })}>
+                <HeaderBtn title={t("Reveal in Finder")} onClick={() => void tryInvoke('workspace:reveal', { workspaceId: workspace.id })}>
                   <FolderOpen size={13} />
                 </HeaderBtn>
               </LiquidGlass>
@@ -260,7 +261,7 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
             <React.Suspense
               fallback={
                 <div className="flex h-full items-center justify-center gap-2 text-sm text-muted">
-                  <Spinner /> Loading editor…
+                  <Spinner />{t("Loading editor…")} 
                 </div>
               }
             >
@@ -273,7 +274,7 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
             <React.Suspense
               fallback={
                 <div className="flex h-full items-center justify-center gap-2 text-sm text-muted">
-                  <Spinner /> Loading preview…
+                  <Spinner />{t("Loading preview…")} 
                 </div>
               }
             >
@@ -326,9 +327,9 @@ function AdoptedMissing({ workspace, onGone }: { workspace: Workspace; onGone: (
         <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-warn/15 text-warn">
           <AlertTriangle size={20} />
         </div>
-        <div className="text-[15px] font-semibold">This workspace was archived in Conductor</div>
-        <div className="mx-auto mt-1.5 max-w-[360px] text-[13px] text-muted">
-          Its directory is gone, but branch <span className="font-mono text-xs text-fg">{workspace.branch}</span> still
+        <div className="text-[15px] font-semibold">{t("This workspace was archived in Conductor")}</div>
+        <div className="mx-auto mt-1.5 max-w-[360px] text-[13px] text-muted">{t("Its directory is gone, but branch")}
+           <span className="font-mono text-xs text-fg">{workspace.branch}</span> still
           exists. Recreate it as a fresh Maestro worktree to keep going, or remove the workspace from Maestro.
         </div>
         <div className="mt-5 flex items-center justify-center gap-2">
@@ -345,8 +346,8 @@ function AdoptedMissing({ workspace, onGone }: { workspace: Workspace; onGone: (
                 onConfirm: () => void useApp.getState().deleteWorkspace(workspace.id),
               });
             }}
-          >
-            Remove from Maestro
+          >{t("Remove from Maestro")}
+            
           </button>
           <button
             className="btn btn-accent h-8 text-xs"
@@ -383,7 +384,7 @@ function OpenInButton({ workspaceId }: { workspaceId: string }) {
       {editors.length > 1 && (
         <button
           className="-ml-1.5 grid h-7 w-4 shrink-0 place-items-center rounded-full text-faint transition-colors hover:text-fg"
-          title="Open in…"
+          title={t("Open in…")}
           onClick={(e) => {
             const r = e.currentTarget.getBoundingClientRect();
             setMenu({ x: r.right - 200, y: r.bottom + 6 });
@@ -508,13 +509,13 @@ function BranchMenu({ workspace }: { workspace: Workspace }) {
         <div className="absolute left-0 top-full z-40 w-72">
           <Menu onClose={() => setMode('closed')}>
             <MenuItem onClick={() => { setDraft(workspace.branch); setMode('rename'); }}>
-              <Pencil size={12} className="text-muted" /> Rename branch…
+              <Pencil size={12} className="text-muted" />{t("Rename branch…")} 
             </MenuItem>
             <MenuItem onClick={() => { setDraft(''); setMode('create'); }}>
-              <GitBranchPlus size={12} className="text-muted" /> New branch from here…
+              <GitBranchPlus size={12} className="text-muted" />{t("New branch from here…")} 
             </MenuItem>
             <MenuItem onClick={() => setMode('switch')}>
-              <Repeat size={12} className="text-muted" /> Switch branch…
+              <Repeat size={12} className="text-muted" />{t("Switch branch…")} 
             </MenuItem>
           </Menu>
         </div>
@@ -523,7 +524,7 @@ function BranchMenu({ workspace }: { workspace: Workspace }) {
         <div className="absolute left-0 top-full z-40 w-72">
           <Menu onClose={() => setMode('closed')}>
             <div className="max-h-64 overflow-y-auto">
-              {branches === null && <div className="px-3.5 py-2 text-xs text-faint">Loading branches…</div>}
+              {branches === null && <div className="px-3.5 py-2 text-xs text-faint">{t("Loading branches…")}</div>}
               {branches?.filter((b) => b.name !== workspace.branch).map((b) => (
                 <MenuItem key={b.name} onClick={() => void switchTo(b.name)}>
                   <GitBranch size={12} className="text-muted" />
@@ -532,7 +533,7 @@ function BranchMenu({ workspace }: { workspace: Workspace }) {
               ))}
             </div>
             <MenuDivider />
-            <div className="px-3.5 py-1.5 text-2xs text-faint">One branch per worktree — conflicts offer a “-2” copy.</div>
+            <div className="px-3.5 py-1.5 text-2xs text-faint">{t("One branch per worktree — conflicts offer a “-2” copy.")}</div>
           </Menu>
         </div>
       )}

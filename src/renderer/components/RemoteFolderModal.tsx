@@ -4,6 +4,7 @@ import { tryInvoke } from '../lib/api';
 import { useApp } from '../store/app';
 import { DoctorRowLine, Modal, Segmented, Spinner } from './common';
 import type { DoctorRow, FsEntry, SshConfigHost, SshHostConfig } from '../../shared/types';
+import { t } from '../../shared/i18n';
 
 /** uuid-ish id for a new host (main also backfills one). */
 const rid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -265,8 +266,8 @@ export default function RemoteFolderModal() {
                 </>
               )}
               <div className="flex justify-end gap-2 pt-1">
-                <button className="btn btn-ghost h-8 px-3.5 text-muted hover:text-fg" onClick={() => setCreating(false)}>
-                  Cancel
+                <button className="btn btn-ghost h-8 px-3.5 text-muted hover:text-fg" onClick={() => setCreating(false)}>{t("Cancel")}
+                  
                 </button>
                 <button className="btn btn-accent h-8 gap-1.5 px-3.5" onClick={() => void saveNewHost()}>
                   <Plug size={12} /> Save &amp; connect

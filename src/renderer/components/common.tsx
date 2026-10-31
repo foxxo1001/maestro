@@ -5,6 +5,7 @@ import { Check, Circle, Pencil } from 'lucide-react';
 import type { DoctorRow } from '../../shared/types';
 import { tryInvoke } from '../lib/api';
 import { useApp } from '../store/app';
+import { t } from '../../shared/i18n';
 
 // Presentational primitives moved to the shared UI package (web-desktop-parity
 // spec §2.5) so the renderer and Maestro Web draw identical chrome. Re-exported
@@ -303,16 +304,16 @@ export function ReadUnreadMenu({
     <ContextMenu x={x} y={y} onClose={onClose}>
       {onRename && (
         <ContextMenuItem onClick={() => { onClose(); onRename(); }}>
-          <Pencil size={14} className="text-muted" /> Rename…
+          <Pencil size={14} className="text-muted" />{t("Rename…")} 
         </ContextMenuItem>
       )}
       {unread ? (
         <ContextMenuItem onClick={() => { onClose(); onRead(); }}>
-          <Check size={14} className="text-muted" /> Mark as read
+          <Check size={14} className="text-muted" />{t("Mark as read")} 
         </ContextMenuItem>
       ) : (
         <ContextMenuItem onClick={() => { onClose(); onUnread(); }}>
-          <Circle size={14} className="fill-st-unread text-st-unread" /> Mark as unread
+          <Circle size={14} className="fill-st-unread text-st-unread" />{t("Mark as unread")} 
         </ContextMenuItem>
       )}
     </ContextMenu>
@@ -428,8 +429,8 @@ export function ApiKeyField({
       <div className="flex items-center justify-between">
         {label}
         {url && (
-          <a className="text-2xs text-accent hover:underline" href={url} target="_blank" rel="noreferrer">
-            Get key ↗
+          <a className="text-2xs text-accent hover:underline" href={url} target="_blank" rel="noreferrer">{t("Get key ↗")}
+            
           </a>
         )}
       </div>
@@ -442,8 +443,8 @@ export function ApiKeyField({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && onSave()}
         />
-        <button className="btn text-xs" onClick={onSave}>
-          Save
+        <button className="btn text-xs" onClick={onSave}>{t("Save")}
+          
         </button>
       </div>
       {footer}
@@ -482,8 +483,8 @@ export function FolderField({
       <label className="label !normal-case !text-xs !font-medium !text-fg">{label}</label>
       <div className="flex gap-2">
         <input className="input flex-1 font-mono text-xs" value={value} onChange={(e) => onChange(e.target.value)} />
-        <button className="btn h-[30px]" onClick={onBrowse}>
-          Browse
+        <button className="btn h-[30px]" onClick={onBrowse}>{t("Browse")}
+          
         </button>
       </div>
     </div>

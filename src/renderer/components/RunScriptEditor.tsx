@@ -8,6 +8,7 @@ import { renderMarkdown } from '../../shared/ui/format';
 import { useApp } from '../store/app';
 import { Segmented, Spinner } from './common';
 import { copyText } from '../lib/clipboard';
+import { t } from '../../shared/i18n';
 
 /**
  * Full-width editor for one run script, opened by clicking its card in the Run
@@ -89,8 +90,8 @@ export default function RunScriptEditor({ workspace, scriptId }: { workspace: Wo
         {scriptsLoaded ? (
           <div className="space-y-2 text-center">
             <div>This script no longer exists.</div>
-            <button className="btn h-7 text-xs" onClick={close}>
-              Back
+            <button className="btn h-7 text-xs" onClick={close}>{t("Back")}
+              
             </button>
           </div>
         ) : (

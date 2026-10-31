@@ -6,6 +6,7 @@ import { useApp } from '../store/app';
 import { Spinner } from './common';
 import PtyView from './TerminalPanel';
 import type { HarnessAuthRepair, HarnessId } from '../../shared/types';
+import { t } from '../../shared/i18n';
 
 /**
  * The one-click repair for a broken harness sign-in.
@@ -100,7 +101,7 @@ export default function AuthFix({
         </button>
         {result && !ptyId && (
           <button className="btn shrink-0 gap-1" onClick={() => void startLogin()}>
-            <KeyRound size={11} /> Sign in
+            <KeyRound size={11} />{t("Sign in")} 
           </button>
         )}
         <span className="min-w-0 flex-1 text-2xs text-muted">
@@ -110,9 +111,9 @@ export default function AuthFix({
       {ptyId && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-2xs text-muted">Finish signing in below — a browser window may open.</span>
-            <button className="btn" onClick={() => void finishLogin()}>
-              Done
+            <span className="text-2xs text-muted">{t("Finish signing in below — a browser window may open.")}</span>
+            <button className="btn" onClick={() => void finishLogin()}>{t("Done")}
+              
             </button>
           </div>
           <div className="h-64 overflow-hidden rounded-card border border-border/70">

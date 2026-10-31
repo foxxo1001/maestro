@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowUpCircle, CheckCircle2, X } from 'lucide-react';
 import { on, tryInvoke } from '../lib/api';
 import type { AppUpdate } from '../../shared/types';
+import { t } from '../../shared/i18n';
 
 /**
  * Conductor-style "restart to update" popup: a small, closeable card pinned to
@@ -94,7 +95,7 @@ export default function UpdateToast() {
             <button
               className="-my-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-faint hover:bg-accent-soft hover:text-fg"
               onClick={() => setInstalledDismissed(true)}
-              aria-label="Dismiss"
+              aria-label={t("Dismiss")}
             >
               <X size={12} />
             </button>

@@ -6,6 +6,7 @@ import { useApp } from '../store/app';
 import { LiquidGlass } from '../../shared/ui/LiquidGlass';
 import ConductorImportPanel from './ConductorImportPanel';
 import HarnessSyncPanel from './HarnessSyncPanel';
+import { t } from '../../shared/i18n';
 
 export default function Onboarding() {
   const gh = useApp((s) => s.ghAuth);
@@ -68,7 +69,7 @@ export default function Onboarding() {
       <div className="flex flex-1 items-start justify-center overflow-y-auto px-8 pb-12 pt-4">
         <div className={showIntro ? 'my-auto w-[580px]' : 'my-auto w-[500px]'}>
           <img src={maestroLogo} alt="" className="mx-auto mb-4 h-14 w-14" />
-          <h1 className="mb-3 text-center text-3xl font-semibold tracking-tight">Welcome to Maestro</h1>
+          <h1 className="mb-3 text-center text-3xl font-semibold tracking-tight">{t("Welcome to Maestro")}</h1>
           <p className="mx-auto mb-9 max-w-[440px] text-center text-[13px] leading-relaxed text-muted">
             Run a fleet of coding agents in parallel — each in an isolated git worktree with its own branch, terminal,
             and diff.
@@ -95,8 +96,8 @@ export default function Onboarding() {
                   : "Connect GitHub — Maestro fetches the GitHub CLI automatically if it's missing."}
               </div>
               <button className="btn shrink-0" onClick={() => void useApp.getState().startGithubSignIn()}>
-                <GitHubMark size={13} />
-                Sign in with GitHub
+                <GitHubMark size={13} />{t("Sign in with GitHub")}
+                
               </button>
             </div>
           )}
@@ -122,7 +123,7 @@ export default function Onboarding() {
                   <span className="block truncate text-xs text-muted">{o.blurb}</span>
                 </span>
                 {i === 0 ? (
-                  <span className="btn btn-accent h-8 shrink-0 px-3.5">Open</span>
+                  <span className="btn btn-accent h-8 shrink-0 px-3.5">{t("Open")}</span>
                 ) : (
                   <ChevronRight
                     size={15}

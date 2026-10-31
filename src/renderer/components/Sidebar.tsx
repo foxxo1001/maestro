@@ -66,6 +66,7 @@ import {
 import type { ChatMeta, PrStatus, Project, Workspace } from '../../shared/types';
 import { chatDisplayTitle } from '../../shared/chatTitle';
 import { unwrapShellCommand } from '../../shared/harness/parse';
+import { t } from '../../shared/i18n';
 
 export default function Sidebar() {
   const collapsed = useApp((s) => s.settings.sidebarCollapsed);
@@ -134,8 +135,8 @@ function ExpandedSidebar() {
           )}
           onClick={() => useApp.getState().openWorkspacesView()}
         >
-          <Clock size={15} className="shrink-0" />
-          Workspaces
+          <Clock size={15} className="shrink-0" />{t("Workspaces")}
+          
         </button>
       </div>
       <div className="h-3" />
@@ -143,18 +144,18 @@ function ExpandedSidebar() {
       {/* Projects header + [+] menu (Conductor flow: Open / GitHub / Quick start) */}
       <div className="relative px-3">
         <div className="flex items-center justify-between px-2 py-1">
-          <span className="text-xs font-medium text-faint">Projects</span>
+          <span className="text-xs font-medium text-faint">{t("Projects")}</span>
           <div className="flex items-center gap-0.5">
             <button
               className="no-drag rounded-ctl p-1 text-muted transition-colors hover:bg-accent-soft hover:text-fg"
-              title="Collapse sidebar"
+              title={t("Collapse sidebar")}
               onClick={() => void useApp.getState().saveSettings({ sidebarCollapsed: true })}
             >
               <ChevronsLeft size={15} strokeWidth={1.5} />
             </button>
             <button
               className="no-drag rounded-ctl p-1 text-muted transition-colors hover:bg-accent-soft hover:text-fg"
-              title="Add project"
+              title={t("Add project")}
               onClick={() => setPlus(!plusOpen)}
             >
               <FolderPlus size={15} />
@@ -170,7 +171,7 @@ function ExpandedSidebar() {
                 void useApp.getState().openLocalProject();
               }}
             >
-              <Folder size={15} className="text-muted" /> Open project
+              <Folder size={15} className="text-muted" />{t("Open project")} 
             </MenuItem>
             <MenuItem
               big
@@ -179,7 +180,7 @@ function ExpandedSidebar() {
                 setModal({ kind: 'clone-repo' });
               }}
             >
-              <GitHubMark size={15} className="text-muted" /> Open GitHub project
+              <GitHubMark size={15} className="text-muted" />{t("Open GitHub project")} 
             </MenuItem>
             <MenuItem
               big
@@ -188,7 +189,7 @@ function ExpandedSidebar() {
                 setModal({ kind: 'remote-folder' });
               }}
             >
-              <Server size={15} className="text-muted" /> Open remote folder…
+              <Server size={15} className="text-muted" />{t("Open remote folder…")} 
             </MenuItem>
             <MenuItem
               big
@@ -197,7 +198,7 @@ function ExpandedSidebar() {
                 setModal({ kind: 'create-project' });
               }}
             >
-              <FolderPlus size={15} className="text-muted" /> Quick start
+              <FolderPlus size={15} className="text-muted" />{t("Quick start")} 
             </MenuItem>
             {conductorDetected && (
               <MenuItem
@@ -207,7 +208,7 @@ function ExpandedSidebar() {
                   setModal({ kind: 'conductor-import' });
                 }}
               >
-                <DownloadCloud size={15} className="text-muted" /> Import from Conductor…
+                <DownloadCloud size={15} className="text-muted" />{t("Import from Conductor…")} 
               </MenuItem>
             )}
             {harnessSyncDetected && (
@@ -218,7 +219,7 @@ function ExpandedSidebar() {
                   setModal({ kind: 'harness-sync' });
                 }}
               >
-                <DownloadCloud size={15} className="text-muted" /> Sync chats from Claude Code & Codex…
+                <DownloadCloud size={15} className="text-muted" />{t("Sync chats from Claude Code & Codex…")} 
               </MenuItem>
             )}
           </Menu>
@@ -261,8 +262,8 @@ function ExpandedSidebar() {
               className="flex w-full items-center gap-1.5 px-2 py-1 text-xs font-medium text-faint hover:text-muted"
               onClick={() => setHistoryOpen((v) => !v)}
             >
-              <Clock size={11} />
-              History
+              <Clock size={11} />{t("History")}
+              
               <span className="ml-auto">{archived.length}</span>
               <Chevron open={historyOpen} size={11} />
             </button>
@@ -270,7 +271,7 @@ function ExpandedSidebar() {
               <div data-motion="collapse">
               {archived.map((ws) => (
                 <div key={ws.id} data-motion="row" className="group flex items-center gap-2 rounded-ctl px-2 py-1.5 hover:bg-accent-soft">
-                  <GitBranch size={13} aria-label="archived" className="shrink-0 text-faint" />
+                  <GitBranch size={13} aria-label={t("archived")} className="shrink-0 text-faint" />
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-xs text-muted">{ws.title ?? (ws.wsKind === 'in-place' ? ws.name : ws.branch)}</div>
                     <div className="truncate font-mono text-2xs text-faint">
@@ -279,7 +280,7 @@ function ExpandedSidebar() {
                   </div>
                   <button
                     className="hidden rounded p-1 text-muted hover:text-fg group-hover:block"
-                    title="Restore workspace (with chat history)"
+                    title={t("Restore workspace (with chat history)")}
                     onClick={() => void useApp.getState().restoreWorkspace(ws.id)}
                   >
                     <RotateCcw size={12} />
@@ -320,18 +321,18 @@ function ExpandedSidebar() {
         className="sidebar-foot z-20 mx-2.5 mb-2.5 flex items-center gap-0.5 p-1"
       >
         <button className="btn btn-ghost flex-1 justify-start text-muted" onClick={() => setModal({ kind: 'settings' })}>
-          <Settings size={13} /> Settings
+          <Settings size={13} />{t("Settings")} 
         </button>
         <button
           className="btn btn-ghost text-muted"
-          title="Set up Maestro Web on your phone"
+          title={t("Set up Maestro Web on your phone")}
           onClick={() => setModal({ kind: 'settings', tab: 'account' })}
         >
           <Smartphone size={13} />
         </button>
         <button
           className="btn btn-ghost text-muted"
-          title="Send feedback"
+          title={t("Send feedback")}
           onClick={() => useApp.getState().openFeedback()}
         >
           <MessageSquare size={13} />
@@ -386,7 +387,7 @@ function SidebarContextMenu({ x, y, onClose }: { x: number; y: number; onClose: 
           void useApp.getState().openLocalProject();
         }}
       >
-        <Folder size={15} className="text-muted" /> Open project…
+        <Folder size={15} className="text-muted" />{t("Open project…")} 
       </MenuItem>
       <MenuItem
         onClick={() => {
@@ -394,7 +395,7 @@ function SidebarContextMenu({ x, y, onClose }: { x: number; y: number; onClose: 
           setModal({ kind: 'clone-repo' });
         }}
       >
-        <GitHubMark size={15} className="text-muted" /> Open GitHub project…
+        <GitHubMark size={15} className="text-muted" />{t("Open GitHub project…")} 
       </MenuItem>
       <MenuItem
         onClick={() => {
@@ -402,7 +403,7 @@ function SidebarContextMenu({ x, y, onClose }: { x: number; y: number; onClose: 
           setModal({ kind: 'create-project' });
         }}
       >
-        <FolderPlus size={15} className="text-muted" /> Quick start…
+        <FolderPlus size={15} className="text-muted" />{t("Quick start…")} 
       </MenuItem>
       {conductorDetected && (
         <MenuItem
@@ -411,7 +412,7 @@ function SidebarContextMenu({ x, y, onClose }: { x: number; y: number; onClose: 
             setModal({ kind: 'conductor-import' });
           }}
         >
-          <DownloadCloud size={15} className="text-muted" /> Import from Conductor…
+          <DownloadCloud size={15} className="text-muted" />{t("Import from Conductor…")} 
         </MenuItem>
       )}
       {harnessSyncDetected && (
@@ -421,7 +422,7 @@ function SidebarContextMenu({ x, y, onClose }: { x: number; y: number; onClose: 
             setModal({ kind: 'harness-sync' });
           }}
         >
-          <DownloadCloud size={15} className="text-muted" /> Sync chats from Claude Code & Codex…
+          <DownloadCloud size={15} className="text-muted" />{t("Sync chats from Claude Code & Codex…")} 
         </MenuItem>
       )}
       <MenuDivider />
@@ -431,7 +432,7 @@ function SidebarContextMenu({ x, y, onClose }: { x: number; y: number; onClose: 
           setModal({ kind: 'settings' });
         }}
       >
-        <Settings size={15} className="text-muted" /> Settings…
+        <Settings size={15} className="text-muted" />{t("Settings…")} 
       </MenuItem>
     </div>
   );
@@ -464,7 +465,7 @@ function CollapsedSidebar() {
       <div className="drag-region h-11 w-full shrink-0" />
       <button
         className="no-drag mb-1 grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:bg-accent-soft hover:text-fg"
-        title="Expand sidebar"
+        title={t("Expand sidebar")}
         onClick={() => void useApp.getState().saveSettings({ sidebarCollapsed: false })}
       >
         <ChevronsRight size={16} strokeWidth={1.5} />
@@ -476,7 +477,7 @@ function CollapsedSidebar() {
             'grid h-9 w-9 place-items-center rounded-full transition-colors',
             addOpen ? 'bg-accent-soft text-fg' : 'text-muted hover:bg-accent-soft hover:text-fg'
           )}
-          title="Add project"
+          title={t("Add project")}
           onClick={() => setAddOpen(!addOpen)}
         >
           <FolderPlus size={16} />
@@ -490,7 +491,7 @@ function CollapsedSidebar() {
                 void useApp.getState().openLocalProject();
               }}
             >
-              <Folder size={15} className="text-muted" /> Open project
+              <Folder size={15} className="text-muted" />{t("Open project")} 
             </MenuItem>
             <MenuItem
               big
@@ -499,7 +500,7 @@ function CollapsedSidebar() {
                 setModal({ kind: 'clone-repo' });
               }}
             >
-              <GitHubMark size={15} className="text-muted" /> Open GitHub project
+              <GitHubMark size={15} className="text-muted" />{t("Open GitHub project")} 
             </MenuItem>
             <MenuItem
               big
@@ -508,7 +509,7 @@ function CollapsedSidebar() {
                 setModal({ kind: 'create-project' });
               }}
             >
-              <FolderPlus size={15} className="text-muted" /> Quick start
+              <FolderPlus size={15} className="text-muted" />{t("Quick start")} 
             </MenuItem>
             {conductorDetected && (
               <MenuItem
@@ -518,7 +519,7 @@ function CollapsedSidebar() {
                   setModal({ kind: 'conductor-import' });
                 }}
               >
-                <DownloadCloud size={15} className="text-muted" /> Import from Conductor…
+                <DownloadCloud size={15} className="text-muted" />{t("Import from Conductor…")} 
               </MenuItem>
             )}
             {harnessSyncDetected && (
@@ -529,7 +530,7 @@ function CollapsedSidebar() {
                   setModal({ kind: 'harness-sync' });
                 }}
               >
-                <DownloadCloud size={15} className="text-muted" /> Sync chats from Claude Code & Codex…
+                <DownloadCloud size={15} className="text-muted" />{t("Sync chats from Claude Code & Codex…")} 
               </MenuItem>
             )}
           </FlyoutPanel>
@@ -541,7 +542,7 @@ function CollapsedSidebar() {
           'no-drag mt-1 grid h-9 w-9 place-items-center rounded-full transition-colors',
           showWorkspaces ? 'bg-accent-soft text-fg' : 'text-muted hover:bg-accent-soft hover:text-fg'
         )}
-        title="Workspaces"
+        title={t("Workspaces")}
         onClick={() => useApp.getState().openWorkspacesView()}
       >
         <Clock size={16} />
@@ -557,21 +558,21 @@ function CollapsedSidebar() {
       <div className="relative flex w-full flex-col items-center gap-1 pb-3 pt-2">
         <button
           className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:bg-accent-soft hover:text-fg"
-          title="Set up Maestro Web on your phone"
+          title={t("Set up Maestro Web on your phone")}
           onClick={() => setModal({ kind: 'settings', tab: 'account' })}
         >
           <Smartphone size={16} />
         </button>
         <button
           className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:bg-accent-soft hover:text-fg"
-          title="Send feedback"
+          title={t("Send feedback")}
           onClick={() => useApp.getState().openFeedback()}
         >
           <MessageSquare size={16} />
         </button>
         <button
           className="grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:bg-accent-soft hover:text-fg"
-          title="Settings"
+          title={t("Settings")}
           onClick={() => setModal({ kind: 'settings' })}
         >
           <Settings size={16} />
@@ -649,7 +650,7 @@ function CollapsedProjectIcon({ project, active }: { project: Project; active: b
             <span className="min-w-0 flex-1 truncate text-[13px] font-semibold tracking-tight">{project.name}</span>
           </div>
           <div className="max-h-[60vh] overflow-y-auto">
-            {list.length === 0 && <div className="px-2 py-2 text-2xs text-faint">No workspaces yet</div>}
+            {list.length === 0 && <div className="px-2 py-2 text-2xs text-faint">{t("No workspaces yet")}</div>}
             {list.map((ws, i) => (
               <WorkspaceRow key={ws.id} ws={ws} index={i} active={ws.id === activeWsId} onNavigate={() => setRect(null)} />
             ))}
@@ -683,7 +684,7 @@ function HarnessSyncHint() {
       </button>
       <button
         className="grid h-5 w-5 shrink-0 place-items-center rounded-full text-faint transition-colors hover:bg-accent-soft hover:text-fg"
-        title="Dismiss"
+        title={t("Dismiss")}
         onClick={() =>
           void useApp.getState().saveSettings({
             harnessSync: {
@@ -743,7 +744,7 @@ function ProjectGroup({ project, expanded, onToggle }: { project: Project; expan
         <StatusStack counts={counts} size={12} />
         <button
           className="hidden h-5 w-5 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-accent-soft hover:text-fg group-hover:grid"
-          title="Project options"
+          title={t("Project options")}
           onClick={(e) => {
             e.stopPropagation();
             hideHover();
@@ -770,9 +771,9 @@ function ProjectGroup({ project, expanded, onToggle }: { project: Project; expan
         <DetailCard rect={rect}>
           <div className="text-[13px] font-semibold leading-snug break-words">{project.name}</div>
           <div className="mt-2 border-t pt-2">
-            <div className="mb-1 text-xs font-medium text-faint">Branches</div>
+            <div className="mb-1 text-xs font-medium text-faint">{t("Branches")}</div>
             {list.length === 0 ? (
-              <div className="text-2xs text-faint">No workspaces yet</div>
+              <div className="text-2xs text-faint">{t("No workspaces yet")}</div>
             ) : (
               <div className="space-y-1">
                 {list.map((w) => {
@@ -783,7 +784,7 @@ function ProjectGroup({ project, expanded, onToggle }: { project: Project; expan
                       {hasAnyStatus(wc) ? (
                         <StatusStack counts={wc} size={11} />
                       ) : (
-                        <span className="shrink-0 text-faint">Idle</span>
+                        <span className="shrink-0 text-faint">{t("Idle")}</span>
                       )}
                     </div>
                   );
@@ -824,7 +825,7 @@ function ProjectGroup({ project, expanded, onToggle }: { project: Project; expan
               });
             }}
           >
-            <Trash2 size={13} /> Remove project…
+            <Trash2 size={13} />{t("Remove project…")} 
           </MenuItem>
         </Menu>
       )}
@@ -891,7 +892,7 @@ function NewWorkspaceButton({ project }: { project: Project }) {
           useApp.getState().newChat(folderWs.id);
         }}
       >
-        <Plus size={13} /> New chat
+        <Plus size={13} />{t("New chat")} 
       </button>
     );
   }
@@ -903,7 +904,7 @@ function NewWorkspaceButton({ project }: { project: Project }) {
           className="flex flex-1 items-center gap-2 rounded-[10px] px-2.5 py-1.5 text-left text-[13px] text-faint transition-colors hover:bg-accent-soft hover:text-fg"
           onClick={() => open()}
         >
-          <Plus size={13} /> New workspace
+          <Plus size={13} />{t("New workspace")} 
         </button>
         <button
           className="grid h-7 w-7 place-items-center rounded-full text-faint transition-colors hover:bg-accent-soft hover:text-fg"
@@ -992,10 +993,10 @@ function prView(ws: Workspace, pr: PrStatus | null | undefined): PrView {
 /** At-a-glance PR status glyph, colored like the right panel's PR badge. */
 function SidebarPrIcon({ view }: { view: PrView }) {
   if (!view.hasPr) return null;
-  if (view.state === 'MERGED') return <GitMerge size={12} className="shrink-0 text-st-merged" aria-label="PR merged" />;
-  if (view.state === 'CLOSED') return <GitPullRequest size={12} className="shrink-0 text-err" aria-label="PR closed" />;
+  if (view.state === 'MERGED') return <GitMerge size={12} className="shrink-0 text-st-merged" aria-label={t("PR merged")} />;
+  if (view.state === 'CLOSED') return <GitPullRequest size={12} className="shrink-0 text-err" aria-label={t("PR closed")} />;
   const cls = view.conflicting ? 'text-warn' : view.draft ? 'text-muted' : 'text-ok';
-  return <GitPullRequest size={12} className={clsx('shrink-0', cls)} aria-label="PR open" />;
+  return <GitPullRequest size={12} className={clsx('shrink-0', cls)} aria-label={t("PR open")} />;
 }
 
 function prTitleText(view: PrView): string {
@@ -1218,7 +1219,7 @@ function WorkspaceRow({
                 className="flex shrink-0 items-center gap-0.5 rounded-full bg-accent-soft px-1.5 py-px text-[10px] font-medium text-muted group-hover:hidden"
                 title={`Runs in the cloud${cloudHost ? ` on ${cloudHost.label}` : ''} — keeps going when Maestro is closed`}
               >
-                <Cloud size={9} /> Cloud
+                <Cloud size={9} />{t("Cloud")} 
               </span>
             )}
             {view.hasPr && (
@@ -1251,7 +1252,7 @@ function WorkspaceRow({
           {!merged && (
             <button
               className="grid h-6 w-6 place-items-center rounded-full bg-raised text-muted shadow-sm hover:text-fg"
-              title="Archive workspace"
+              title={t("Archive workspace")}
               onClick={(e) => {
                 e.stopPropagation();
                 void useApp.getState().archiveWorkspace(ws.id);
@@ -1270,11 +1271,11 @@ function WorkspaceRow({
             {ws.branch}
           </div>
           <div className="mt-2 space-y-1 border-t pt-2 text-2xs">
-            <DetailRow label="Workspace" value={ws.name} />
-            <DetailRow label="Status" value={status} />
+            <DetailRow label={t("Workspace")} value={ws.name} />
+            <DetailRow label={t("Status")} value={status} />
             {hasStat && (
               <DetailRow
-                label="Changes"
+                label={t("Changes")}
                 value={
                   <>
                     <span className="text-ok">+{stat!.additions}</span> <span className="text-err">-{stat!.deletions}</span>
@@ -1284,16 +1285,16 @@ function WorkspaceRow({
             )}
             {ws.prNumber != null && (
               <DetailRow
-                label="Pull request"
+                label={t("Pull request")}
                 value={ws.prState === 'MERGED' ? `#${ws.prNumber} · merged` : `#${ws.prNumber}`}
               />
             )}
-            {index >= 0 && index < 9 && <DetailRow label="Shortcut" value={`⌘${index + 1}`} />}
+            {index >= 0 && index < 9 && <DetailRow label={t("Shortcut")} value={`⌘${index + 1}`} />}
           </div>
           <div className="mt-2 border-t pt-2">
-            <div className="mb-1 text-xs font-medium text-faint">Sessions</div>
+            <div className="mb-1 text-xs font-medium text-faint">{t("Sessions")}</div>
             {sessions.length === 0 ? (
-              <div className="text-2xs text-faint">No sessions yet</div>
+              <div className="text-2xs text-faint">{t("No sessions yet")}</div>
             ) : (
               <div className="space-y-1">
                 {sessions.map((s) => (
@@ -1313,30 +1314,30 @@ function WorkspaceRow({
         <ContextMenu x={ctxMenu.x} y={ctxMenu.y} onClose={() => setCtxMenu(null)}>
           {unread ? (
             <ContextMenuItem onClick={() => { setCtxMenu(null); useApp.getState().markWorkspaceRead(ws.id); }}>
-              <Check size={14} className="text-muted" /> Mark as read
+              <Check size={14} className="text-muted" />{t("Mark as read")} 
             </ContextMenuItem>
           ) : (
             <ContextMenuItem onClick={() => { setCtxMenu(null); useApp.getState().markWorkspaceUnread(ws.id); }}>
-              <Circle size={14} className="fill-st-unread text-st-unread" /> Mark as unread
+              <Circle size={14} className="fill-st-unread text-st-unread" />{t("Mark as unread")} 
             </ContextMenuItem>
           )}
           {cloudEligible && (cloudConversation ? (
             <ContextMenuItem onClick={() => { setCtxMenu(null); void moveWorkspaceCloud(ws.id, null); }}>
-              <Laptop size={14} className="text-muted" /> Bring local
+              <Laptop size={14} className="text-muted" />{t("Bring local")} 
             </ContextMenuItem>
           ) : (
             <ContextMenuItem
               onClick={() => {
                 setCtxMenu(null);
                 if (!defaultCloudHost) {
-                  useApp.getState().toast('error', 'Pick a cloud server in Settings → Cloud first.');
+                  useApp.getState().toast('error', t("Pick a cloud server in Settings → Cloud first."));
                   useApp.getState().setModal({ kind: 'settings', tab: 'cloud' });
                   return;
                 }
                 void moveWorkspaceCloud(ws.id, defaultCloudHost);
               }}
             >
-              <Cloud size={14} className="text-muted" /> Run in cloud
+              <Cloud size={14} className="text-muted" />{t("Run in cloud")} 
             </ContextMenuItem>
           ))}
         </ContextMenu>
@@ -1414,8 +1415,8 @@ function ArchiveMergedButton({ ws }: { ws: Workspace }) {
       tone="merged"
       radius={5}
       className="flex h-[18px] w-[18px] shrink-0 items-center justify-center transition active:scale-95"
-      title="Merged — archive this workspace"
-      aria-label="Merged — archive this workspace"
+      title={t("Merged — archive this workspace")}
+      aria-label={t("Merged — archive this workspace")}
       onClick={(e) => {
         e.stopPropagation();
         void useApp.getState().archiveWorkspace(ws.id);
@@ -1472,11 +1473,11 @@ function GhBadge() {
   return (
     <button
       className="gh-signin flex items-center gap-1 rounded-ctl px-2 py-1 text-2xs text-warn hover:bg-accent-soft"
-      title="Sign in with GitHub — enables cloning, PRs, checks and pushes"
+      title={t("Sign in with GitHub — enables cloning, PRs, checks and pushes")}
       onClick={() => void useApp.getState().startGithubSignIn()}
     >
-      <GitHubMark size={12} />
-      Sign in to GitHub
+      <GitHubMark size={12} />{t("Sign in to GitHub")}
+      
     </button>
   );
 }

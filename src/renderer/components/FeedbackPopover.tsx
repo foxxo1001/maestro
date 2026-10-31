@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { tryInvoke } from '../lib/api';
 import { useApp } from '../store/app';
 import { useDismiss } from './common';
+import { t } from '../../shared/i18n';
 
 /**
  * The feedback box (§10): a small glass card anchored above the Settings gear.
@@ -72,8 +73,8 @@ export default function FeedbackPopover() {
           </label>
           {failure && <div className="mt-1.5 text-2xs text-err">{failure}</div>}
           <div className="mt-3 flex justify-end gap-1.5">
-            <button className="btn btn-ghost text-muted hover:text-fg" onClick={close}>
-              Cancel
+            <button className="btn btn-ghost text-muted hover:text-fg" onClick={close}>{t("Cancel")}
+              
             </button>
             <button className="btn btn-accent px-3.5" disabled={!canSend} onClick={() => void send()}>
               {sending ? 'Sending…' : 'Send'}

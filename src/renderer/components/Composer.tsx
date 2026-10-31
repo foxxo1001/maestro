@@ -38,6 +38,7 @@ import { caretOnEdgeLine, promptHistory } from '../lib/promptRecall';
 import type { StashedPrompt } from '../lib/promptStash';
 import { timeAgo } from '../../shared/ui/format';
 import { GLASS_FIELD, LiquidGlass } from '../../shared/ui/LiquidGlass';
+import { t as zh } from '../../shared/i18n';
 
 export default function Composer({
   workspace,
@@ -684,8 +685,8 @@ export default function Composer({
                     onClick={() =>
                       useApp.getState().remoteSetupLogin(workspace.id, workspace.harness, remoteCurrent.loginCommand)
                     }
-                  >
-                    Restart sign-in
+                  >{zh("Restart sign-in")}
+                    
                   </button>
                 </div>
               </>
@@ -697,8 +698,8 @@ export default function Composer({
                   <button
                     className="btn btn-accent h-7 text-xs"
                     onClick={() => void useApp.getState().remoteSetupInstall(workspace.id, workspace.harness)}
-                  >
-                    Try again
+                  >{zh("Try again")}
+                    
                   </button>
                   <button
                     className="btn h-7 gap-1 text-xs"
@@ -707,7 +708,7 @@ export default function Composer({
                       useApp.getState().remoteSetupLogin(workspace.id, workspace.harness, remoteCurrent.setupHint)
                     }
                   >
-                    <TerminalIcon size={12} /> Run in terminal instead
+                    <TerminalIcon size={12} />{zh("Run in terminal instead")} 
                   </button>
                 </div>
               </>
@@ -718,8 +719,8 @@ export default function Composer({
                     ? `${remoteCurrent.bin} isn’t installed on this server`
                     : `You’re not signed in to ${remoteCurrent.bin} on this server`}
                 </div>
-                <div className="text-muted">
-                  Agents run on the host where the code lives, so <code className="font-mono">{remoteCurrent.bin}</code>{' '}
+                <div className="text-muted">{zh("Agents run on the host where the code lives, so")}
+                   <code className="font-mono">{remoteCurrent.bin}</code>{' '}
                   must be installed and signed in there.{' '}
                   {!remoteCurrent.installed
                     ? 'One click: Maestro installs it on the server, then walks you through its sign-in.'
@@ -742,7 +743,7 @@ export default function Composer({
                         useApp.getState().remoteSetupLogin(workspace.id, workspace.harness, remoteCurrent.loginCommand)
                       }
                     >
-                      <TerminalIcon size={12} /> Sign in
+                      <TerminalIcon size={12} />{zh("Sign in")} 
                     </button>
                   )}
                 </div>
@@ -754,8 +755,8 @@ export default function Composer({
         {scheduled.length > 0 && (
           <div data-motion="collapse" className={PENDING_CARD}>
             <div className={PENDING_HEAD}>
-              <Clock size={12} className="text-faint" />
-              Scheduled
+              <Clock size={12} className="text-faint" />{zh("Scheduled")}
+              
             </div>
             {scheduled.map((m) => (
               <ScheduledItem key={m.id} workspaceId={workspace.id} agentId={agentId} item={m} />
@@ -764,7 +765,7 @@ export default function Composer({
         )}
         {queued.length > 0 && (
           <div data-motion="collapse" className={PENDING_CARD}>
-            <div className={PENDING_HEAD}>Queued</div>
+            <div className={PENDING_HEAD}>{zh("Queued")}</div>
             {queued.map((q) => (
               <QueuedItem key={q.id} workspaceId={workspace.id} agentId={agentId} item={q} />
             ))}
@@ -777,8 +778,8 @@ export default function Composer({
           className={clsx('lg-field', dragDepth > 0 && 'outline-dashed outline-2 outline-offset-2 outline-accent')}
         >
           {dragDepth > 0 && (
-            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-[22px] bg-accent-tint text-[13px] font-medium text-accent">
-              Drop images or files to attach
+            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-[22px] bg-accent-tint text-[13px] font-medium text-accent">{zh("Drop images or files to attach")}
+              
             </div>
           )}
 
@@ -842,7 +843,7 @@ export default function Composer({
           )}
 
           {!focused && !text && (
-            <span className="pointer-events-none absolute right-4 top-3.5 text-xs text-faint">⌘L to focus</span>
+            <span className="pointer-events-none absolute right-4 top-3.5 text-xs text-faint">{zh("⌘L to focus")}</span>
           )}
           <textarea
             ref={taRef}
@@ -889,13 +890,13 @@ export default function Composer({
                   footer={
                     <button
                       className={MENU_FOOT_ROW}
-                      title="Set up or log into agent harnesses"
+                      title={zh("Set up or log into agent harnesses")}
                       onClick={() => {
                         useApp.getState().setModal({ kind: 'settings', tab: 'harnesses' });
                         setModelMenu(false);
                       }}
-                    >
-                      Manage harnesses
+                    >{zh("Manage harnesses")}
+                      
                       <ArrowRight size={12} className="ml-auto shrink-0 text-faint" />
                     </button>
                   }
@@ -919,15 +920,15 @@ export default function Composer({
                             // probe is in flight, else a one-click set-up / sign-in.
                             remoteLoading ? (
                               <span className="ml-auto flex items-center gap-1 font-normal normal-case text-faint">
-                                <Spinner size={11} className="!text-current" /> checking…
+                                <Spinner size={11} className="!text-current" />{zh("checking…")} 
                               </span>
                             ) : setupSt?.phase === 'installing' ? (
                               <span className="ml-auto flex items-center gap-1 font-normal normal-case text-faint">
-                                <Spinner size={11} className="!text-current" /> installing…
+                                <Spinner size={11} className="!text-current" />{zh("installing…")} 
                               </span>
                             ) : setupSt?.phase === 'login' ? (
                               <span className="ml-auto flex items-center gap-1 font-normal normal-case text-faint">
-                                <Spinner size={11} className="!text-current" /> finish sign-in in the terminal
+                                <Spinner size={11} className="!text-current" />{zh("finish sign-in in the terminal")} 
                               </span>
                             ) : !remoteStatus?.installed ? (
                               // Managed one-click install; the badge flips to
@@ -961,14 +962,14 @@ export default function Composer({
                                   setModelMenu(false); // the sign-in prompts are in the terminal below
                                 }}
                               >
-                                <TerminalIcon size={10} /> sign in
+                                <TerminalIcon size={10} />{zh("sign in")} 
                               </button>
                             ) : null // ready → no badge, availability is the feedback
                           ) : !ready ? (
-                            <span className="ml-auto font-normal normal-case">not connected</span>
+                            <span className="ml-auto font-normal normal-case">{zh("not connected")}</span>
                           ) : (
                             !h.installed && (
-                              <span className="ml-auto font-normal normal-case text-ok">logged in</span>
+                              <span className="ml-auto font-normal normal-case text-ok">{zh("logged in")}</span>
                             )
                           )}
                         </div>
@@ -1133,14 +1134,14 @@ export default function Composer({
               <Sparkles size={14} />
             </button>
 
-            <button className="btn btn-ghost h-7 w-7 !px-0 text-muted hover:text-fg" title="Attach files" onClick={pickFiles}>
+            <button className="btn btn-ghost h-7 w-7 !px-0 text-muted hover:text-fg" title={zh("Attach files")} onClick={pickFiles}>
               <Plus size={15} />
             </button>
 
             {agentRunning && (
               <button
                 className="flex h-7 w-7 items-center justify-center rounded-full border border-err/40 text-err transition-colors hover:bg-err/10"
-                title="Stop agent (also clears the queue)"
+                title={zh("Stop agent (also clears the queue)")}
                 onClick={() => useApp.getState().stopAgent(workspace.id, agentId)}
               >
                 <Square size={11} fill="currentColor" />
@@ -1177,8 +1178,8 @@ export default function Composer({
                 <span aria-hidden className="my-1.5 w-px bg-on-ink/25" />
                 <button
                   className="flex w-6 items-center justify-center pr-0.5 transition-colors hover:bg-on-ink/10 disabled:opacity-40 disabled:hover:bg-transparent"
-                  title="Schedule for later"
-                  aria-label="Schedule for later"
+                  title={zh("Schedule for later")}
+                  aria-label={zh("Schedule for later")}
                   aria-haspopup="menu"
                   aria-expanded={scheduleMenu}
                   disabled={refining || nothingToSend}
@@ -1357,7 +1358,7 @@ function StashPopover({
   const workspaces = useApp((s) => s.workspaces);
   return (
     <UpMenu wide tall right onClose={onClose}>
-      <div className="px-3.5 pb-1 pt-1.5 text-2xs text-faint">Stashed prompts</div>
+      <div className="px-3.5 pb-1 pt-1.5 text-2xs text-faint">{zh("Stashed prompts")}</div>
       {stash.map((e) => {
         const from = e.workspaceId === workspaceId ? null : workspaces.find((w) => w.id === e.workspaceId);
         return (
@@ -1372,7 +1373,7 @@ function StashPopover({
             </button>
             <button
               className="shrink-0 rounded-full p-0.5 text-faint opacity-0 transition-opacity hover:text-fg group-hover:opacity-100"
-              title="Delete"
+              title={zh("Delete")}
               onClick={() => useApp.getState().dropStash(e.id)}
             >
               <X size={12} />
@@ -1416,8 +1417,8 @@ function SchedulePopover({
           onClick={() => onPick(limit.at, 'limit-reset')}
         >
           <span className="flex w-full items-center gap-1.5 text-[13px]">
-            <Clock size={12} className="shrink-0 text-muted" />
-            After limits reset
+            <Clock size={12} className="shrink-0 text-muted" />{zh("After limits reset")}
+            
             <span className="ml-auto font-mono text-2xs" style={{ color: usageColor(limit.windows[0], 'var(--muted)') }}>
               {Math.round(limit.windows[0].pct)}%
             </span>
@@ -1437,10 +1438,10 @@ function SchedulePopover({
           className="mx-1 flex w-[calc(100%-0.5rem)] flex-col items-start gap-0.5 rounded-lg px-2.5 py-2 text-left opacity-50"
         >
           <span className="flex w-full items-center gap-1.5 text-[13px]">
-            <Clock size={12} className="shrink-0 text-muted" />
-            After limits reset
+            <Clock size={12} className="shrink-0 text-muted" />{zh("After limits reset")}
+            
           </span>
-          <span className="pl-[18px] text-2xs text-faint">No window is counting down</span>
+          <span className="pl-[18px] text-2xs text-faint">{zh("No window is counting down")}</span>
         </button>
       )}
       {(limit || (usage && !limit)) && chips.length > 0 && <div className="mx-2.5 my-1 border-t" />}
@@ -1456,7 +1457,7 @@ function SchedulePopover({
       ))}
       <div className="mx-2.5 my-1 border-t" />
       <div className="px-3.5 pb-2.5 pt-1.5">
-        <div className="mb-1.5 text-xs text-faint">Pick a time</div>
+        <div className="mb-1.5 text-xs text-faint">{zh("Pick a time")}</div>
         <div className="flex items-center gap-1.5">
           <input
             type="datetime-local"
@@ -1473,8 +1474,8 @@ function SchedulePopover({
           <button
             className="btn btn-accent h-7 shrink-0 px-3"
             onClick={pickCustom}
-          >
-            Set
+          >{zh("Set")}
+            
           </button>
         </div>
         {/* Local: main's process doesn't outlive the window, so be honest about
@@ -1641,7 +1642,7 @@ function PendingRow({
           {editable && (
             <button
               className="shrink-0 rounded-full p-1 text-faint transition-colors hover:bg-accent-soft hover:text-fg"
-              title="Add images or files"
+              title={zh("Add images or files")}
               onMouseDown={(e) => e.preventDefault()}
               onClick={pickFiles}
             >
@@ -1650,7 +1651,7 @@ function PendingRow({
           )}
           <button
             className="shrink-0 rounded-full p-1 text-faint transition-colors hover:bg-accent-soft hover:text-ok disabled:opacity-40"
-            title="Save (Enter)"
+            title={zh("Save (Enter)")}
             disabled={saving > 0}
             onMouseDown={(e) => e.preventDefault()}
             onClick={commit}
@@ -1673,13 +1674,13 @@ function PendingRow({
   return (
     <div data-motion="row" className="group mx-1 flex items-center gap-1 rounded-lg py-1.5 pl-2.5 pr-1.5 transition-colors hover:bg-accent-soft">
       <div className="min-w-0 flex-1">
-        <button className="block w-full min-w-0 cursor-text text-left" title="Edit message" onClick={startEdit}>
+        <button className="block w-full min-w-0 cursor-text text-left" title={zh("Edit message")} onClick={startEdit}>
           <span className={clsx('block truncate text-[13px]', !text && 'text-faint')}>{text || 'Attachment'}</span>
           {subtitle && <span className="mt-0.5 block truncate text-2xs text-faint">{subtitle}</span>}
         </button>
         {attachments && attachments.length > 0 && <PendingAttachments workspaceId={workspaceId} attachments={attachments} />}
       </div>
-      <button className={clsx(ROW_ACTION, 'hover:text-fg')} title="Edit message" onClick={startEdit}>
+      <button className={clsx(ROW_ACTION, 'hover:text-fg')} title={zh("Edit message")} onClick={startEdit}>
         <Pencil size={13} />
       </button>
       {actions}
@@ -1767,7 +1768,7 @@ function ImageThumb({
       {onRemove && (
         <button
           className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-fg text-bg shadow transition-colors hover:bg-err"
-          title="Remove"
+          title={zh("Remove")}
           onMouseDown={(e) => e.preventDefault()}
           onClick={onRemove}
         >
@@ -1815,14 +1816,14 @@ function ScheduledItem({
         <>
           <button
             className={clsx(ROW_ACTION, 'hover:text-fg')}
-            title="Send now instead of waiting"
+            title={zh("Send now instead of waiting")}
             onClick={() => useApp.getState().sendScheduledNow(workspaceId, agentId, item.id)}
           >
             <ArrowUp size={13} />
           </button>
           <button
             className={clsx(ROW_ACTION, 'hover:text-err')}
-            title="Cancel scheduled message"
+            title={zh("Cancel scheduled message")}
             onClick={() => useApp.getState().cancelScheduled(workspaceId, agentId, item.id)}
           >
             <X size={13} />
@@ -1928,7 +1929,7 @@ function UsageRing({
       onMouseEnter={enter}
       onMouseLeave={leave}
     >
-      <span className="flex h-7 w-7 items-center justify-center rounded-full text-muted transition-colors hover:bg-accent-soft" aria-label="Plan usage">
+      <span className="flex h-7 w-7 items-center justify-center rounded-full text-muted transition-colors hover:bg-accent-soft" aria-label={zh("Plan usage")}>
         <Donut pct={pct} color={color} />
       </span>
       {open && (
@@ -2024,20 +2025,20 @@ function UsageMenu({
                   // the user's eyes; the push event reloads the rows.
                   void invoke('harness:setActiveLogin', { harness, loginId: viewed.id }).then(() => onReload());
                 }}
-              >
-                Use this login
+              >{zh("Use this login")}
+                
               </button>
             </div>
           )}
           <button
             className={MENU_FOOT_ROW}
-            title="Add, sign into, or remove logins"
+            title={zh("Add, sign into, or remove logins")}
             onClick={() => {
               useApp.getState().setModal({ kind: 'settings', tab: 'harnesses' });
               onClose();
             }}
-          >
-            Manage logins
+          >{zh("Manage logins")}
+            
             <ArrowRight size={12} className="ml-auto shrink-0 text-faint" />
           </button>
         </div>
@@ -2046,15 +2047,15 @@ function UsageMenu({
       <div className="px-3 py-2">
         <div className="flex items-center gap-1.5">
           {many && (
-            <button className={arrow} title="Previous login (←)" onClick={() => move(-1)}>
+            <button className={arrow} title={zh("Previous login (←)")} onClick={() => move(-1)}>
               <ChevronLeft size={14} />
             </button>
           )}
           <span className="min-w-0 flex-1 truncate text-xs font-medium">{viewed.label}</span>
-          {isActive && <span className="rounded-full bg-accent-soft px-2 py-0.5 text-2xs font-medium text-fg">Current</span>}
+          {isActive && <span className="rounded-full bg-accent-soft px-2 py-0.5 text-2xs font-medium text-fg">{zh("Current")}</span>}
           {many && <span className="text-2xs text-faint">{idx + 1}/{list.length}</span>}
           {many && (
-            <button className={arrow} title="Next login (→)" onClick={() => move(1)}>
+            <button className={arrow} title={zh("Next login (→)")} onClick={() => move(1)}>
               <ChevronRight size={14} />
             </button>
           )}
@@ -2089,14 +2090,14 @@ function QueuedItem({
           {/* Steer: interrupt the current turn so this message runs next. */}
           <button
             className={clsx(ROW_ACTION, 'hover:text-fg')}
-            title="Send now — interrupt the current turn to run this message next"
+            title={zh("Send now — interrupt the current turn to run this message next")}
             onClick={() => useApp.getState().sendQueuedNow(workspaceId, agentId, item.id)}
           >
             <ArrowUp size={13} />
           </button>
           <button
             className={clsx(ROW_ACTION, 'hover:text-err')}
-            title="Remove from queue"
+            title={zh("Remove from queue")}
             onClick={() => useApp.getState().removeQueued(workspaceId, agentId, item.id)}
           >
             <X size={13} />
@@ -2142,11 +2143,11 @@ function BackgroundTaskStrip({
   return (
     <div className={PENDING_CARD}>
       <div className={clsx(PENDING_HEAD, 'pr-2')}>
-        <span className="flex-1">Background tasks</span>
+        <span className="flex-1">{zh("Background tasks")}</span>
         {anyFinished && (
           <button
             className="-my-1 shrink-0 rounded-full p-1 text-faint transition-colors hover:bg-accent-soft hover:text-fg"
-            title="Dismiss finished tasks"
+            title={zh("Dismiss finished tasks")}
             onClick={() => useApp.getState().clearBackgroundTasks(workspaceId, agentId)}
           >
             <X size={13} />
@@ -2173,8 +2174,8 @@ function BackgroundTaskStrip({
                 {t.outputFile && (
                   <>
                     {' · '}
-                    <span className="font-mono" title={t.outputFile}>
-                      output kept
+                    <span className="font-mono" title={t.outputFile}>{zh("output kept")}
+                      
                     </span>
                   </>
                 )}

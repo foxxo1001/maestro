@@ -6,6 +6,7 @@ import { chatDisplayTitle } from '../../shared/chatTitle';
 import { timeAgo } from '../../shared/ui/format';
 import { useApp, useCaps } from '../store/app';
 import { EmptyHint, Segmented, Spinner } from './common';
+import { t } from '../../shared/i18n';
 
 type Scope = 'session' | 'workspace' | 'project';
 
@@ -89,7 +90,7 @@ export default function StatusPanel({ workspace }: { workspace: Workspace }) {
         {settingUp ? (
           <EmptyHint
             icon={SPARKLES_ICON}
-            title="Setting up workspace"
+            title={t("Setting up workspace")}
             body="Status appears once the worktree is ready and there's activity to recap."
           />
         ) : sessionEmpty ? (
@@ -104,8 +105,8 @@ export default function StatusPanel({ workspace }: { workspace: Workspace }) {
             title="Couldn't generate status"
             body={slot.error}
             action={
-              <button className="btn h-7 text-xs" onClick={() => void useApp.getState().generateStatus(req)}>
-                Try again
+              <button className="btn h-7 text-xs" onClick={() => void useApp.getState().generateStatus(req)}>{t("Try again")}
+                
               </button>
             }
           />

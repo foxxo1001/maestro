@@ -36,6 +36,7 @@ import { matchesShortcut } from '../../shared/shortcuts';
 import { useShortcuts } from '../lib/shortcuts';
 import type { Workspace } from '../../shared/types';
 import { copyText } from '../lib/clipboard';
+import { t } from '../../shared/i18n';
 
 // Free a workspace's buffers when it's archived/removed (spec §6). Registered at
 // chunk-load, so it's a no-op until the editor has actually been opened.
@@ -459,8 +460,8 @@ export default function EditorSurface({ workspace, active }: { workspace: Worksp
             disabled={!activeDirty}
             onClick={() => void save(activeFile)}
           >
-            <Save size={11} />
-            Save
+            <Save size={11} />{t("Save")}
+            
           </button>
         </div>
       )}
@@ -808,14 +809,14 @@ function CloseDirtyModal({
       onClose={onCancel}
       footer={
         <>
-          <button className="btn" onClick={onCancel}>
-            Cancel
+          <button className="btn" onClick={onCancel}>{t("Cancel")}
+            
           </button>
           <button className="btn btn-danger" onClick={onDiscard}>
             Discard
           </button>
-          <button className="btn btn-accent" onClick={onSave}>
-            Save
+          <button className="btn btn-accent" onClick={onSave}>{t("Save")}
+            
           </button>
         </>
       }

@@ -8,6 +8,7 @@ import { ApiKeyField, Segmented, Spinner, Toggle } from './common';
 import AuthFix from './AuthFix';
 import PtyView from './TerminalPanel';
 import type { HarnessAuth, HarnessId, HarnessLoginView, HarnessLogins, ModelOption, SubUsage } from '../../shared/types';
+import { t } from '../../shared/i18n';
 
 /** Settings layout (shared with SettingsModal, which imports this file): a
  *  titled group of aligned two-column rows on one quiet card — Lovable-style.
@@ -235,7 +236,7 @@ function HarnessAuthPanel({ harness }: { harness: HarnessId }) {
       </div>
     );
   }
-  if (!auth) return <div className="text-xs text-muted">Couldn’t read harness status.</div>;
+  if (!auth) return <div className="text-xs text-muted">{t("Couldn’t read harness status.")}</div>;
 
   return (
     <div className="space-y-6">
@@ -246,7 +247,7 @@ function HarnessAuthPanel({ harness }: { harness: HarnessId }) {
         >
           {auth.connected ? (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-ok/10 px-2.5 py-1 text-2xs font-medium text-ok">
-              <span className="h-1.5 w-1.5 rounded-full bg-current" /> Connected
+              <span className="h-1.5 w-1.5 rounded-full bg-current" />{t("Connected")} 
             </span>
           ) : (
             <span
@@ -261,14 +262,14 @@ function HarnessAuthPanel({ harness }: { harness: HarnessId }) {
           )}
           <button
             className="btn btn-ghost h-7 w-7 !px-0 text-muted hover:text-fg"
-            title="Refresh"
-            aria-label="Refresh"
+            title={t("Refresh")}
+            aria-label={t("Refresh")}
             onClick={() => void refresh()}
           >
             <RefreshCw size={13} className={clsx(loading && 'animate-spin')} />
           </button>
         </SettingsRow>
-        {auth.version && <Row label="Version" value={auth.version} />}
+        {auth.version && <Row label={t("Version")} value={auth.version} />}
         {auth.details.map((d) => (
           <Row key={d.label} label={d.label} value={d.value} />
         ))}
@@ -289,15 +290,15 @@ function HarnessAuthPanel({ harness }: { harness: HarnessId }) {
                   {installFailed ? (
                     'Install didn’t finish — check the output below, then retry.'
                   ) : (
-                    <>
-                      Running <code className="font-mono text-fg">{installCmd}</code>
+                    <>{t("Running")}
+                       <code className="font-mono text-fg">{installCmd}</code>
                     </>
                   )}
                 </span>
                 <div className="flex shrink-0 items-center gap-1.5">
                   {installFailed && (
-                    <button className="btn btn-accent" onClick={() => void startInstall()}>
-                      Retry
+                    <button className="btn btn-accent" onClick={() => void startInstall()}>{t("Retry")}
+                      
                     </button>
                   )}
                   <button className="btn btn-ghost" onClick={() => void cancelInstall()}>
@@ -329,11 +330,11 @@ function HarnessAuthPanel({ harness }: { harness: HarnessId }) {
             // login or a specific row's (multi-login). `claude auth login` exits
             // on its own; other CLIs' REPL logins stay open until Done.
             <SettingsSection
-              title="Sign in"
-              description="Finish signing in below — a browser window may open."
+              title={t("Sign in")}
+              description={t("Finish signing in below — a browser window may open.")}
               action={
-                <button className="btn" onClick={() => void closeLogin()}>
-                  Done
+                <button className="btn" onClick={() => void closeLogin()}>{t("Done")}
+                  
                 </button>
               }
               bare
@@ -344,10 +345,10 @@ function HarnessAuthPanel({ harness }: { harness: HarnessId }) {
             </SettingsSection>
           ) : auth.multiLogin ? (
             <SettingsSection
-              title="Logins"
+              title={t("Logins")}
               action={
                 <button className="btn btn-ghost gap-1" disabled={!auth.installed} onClick={() => void addLogin()}>
-                  <Plus size={12} /> Add login
+                  <Plus size={12} />{t("Add login")} 
                 </button>
               }
             >
@@ -363,8 +364,8 @@ function HarnessAuthPanel({ harness }: { harness: HarnessId }) {
                 />
               ))}
               <SettingsRow
-                label="Rotate logins automatically"
-                description="Switch to the next login when one hits a usage limit."
+                label={t("Rotate logins automatically")}
+                description={t("Switch to the next login when one hits a usage limit.")}
               >
                 <Toggle
                   checked={settings.loginRotation !== false}
@@ -375,7 +376,7 @@ function HarnessAuthPanel({ harness }: { harness: HarnessId }) {
           ) : (
             <SettingsSection>
               <SettingsRow
-                label="Sign in"
+                label={t("Sign in")}
                 description={
                   auth.installed
                     ? `Opens ${auth.loginLabel} in a terminal here.`
@@ -407,8 +408,8 @@ function HarnessAuthPanel({ harness }: { harness: HarnessId }) {
               onChange={setKeyDraft}
               onSave={() => void saveKey()}
               footer={
-                <p className="text-2xs leading-relaxed text-muted">
-                  Stored locally and injected as <span className="font-mono">{auth.apiKey.envVar}</span> for{' '}
+                <p className="text-2xs leading-relaxed text-muted">{t("Stored locally and injected as")}
+                   <span className="font-mono">{auth.apiKey.envVar}</span> for{' '}
                   {auth.displayName} runs. Leave blank to use the CLI login{auth.loginLabel ? ' above' : ''}.
                 </p>
               }
@@ -421,7 +422,7 @@ function HarnessAuthPanel({ harness }: { harness: HarnessId }) {
         <SettingsSection>
           <SettingsRow
             stack
-            label="Custom models"
+            label={t("Custom models")}
             description={`Appended to ${auth.displayName}'s model list — for brand-new models no catalog lists yet. One per line: "model-id | Display label" (label optional).`}
           >
             <CustomModelsArea harness={harness} />
@@ -534,8 +535,8 @@ function LoginRow({
       <span className="shrink-0 text-2xs text-muted">{loginStatus(row)}</span>
       <div className="flex shrink-0 items-center gap-1">
         {!active && (
-          <button className="btn" disabled={!row.signedIn} onClick={onUse}>
-            Use
+          <button className="btn" disabled={!row.signedIn} onClick={onUse}>{t("Use")}
+            
           </button>
         )}
         <button className="btn btn-ghost" disabled={!installed} onClick={onSignIn}>
@@ -544,7 +545,7 @@ function LoginRow({
         {!isDefault && (
           <button
             className="btn btn-ghost h-7 w-7 !px-0 text-muted hover:text-err"
-            title="Remove login"
+            title={t("Remove login")}
             onClick={onRemove}
           >
             <X size={12} />

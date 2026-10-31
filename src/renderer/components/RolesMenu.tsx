@@ -6,6 +6,7 @@ import { HarnessLogo } from '../../shared/ui/brandIcons';
 import { EffortBars, PickerOption, RenameInput, useDismissFromParent } from './common';
 import { effortLevelsFor, useHarnessModels, type EffectiveModels } from '../lib/harnessModels';
 import { Chevron } from '../../shared/ui/primitives';
+import { t } from '../../shared/i18n';
 import {
   BUILTIN_SPECIALIST_ROLES,
   HARNESS_DISPLAY,
@@ -306,7 +307,7 @@ export default function RolesMenu({
         className="ml-[26px] mt-1 flex items-center gap-1 rounded-full px-1.5 py-0.5 text-2xs text-faint transition-colors hover:bg-accent-soft hover:text-muted"
         onClick={() => setInstr((v) => (v === id ? null : id))}
       >
-        <Chevron open={instr === id} size={11} /> Instructions
+        <Chevron open={instr === id} size={11} />{t("Instructions")} 
       </button>
       {instr === id && <InstrArea value={roles[id].md} onSave={(md) => patchRole(id, { md })} />}
     </>

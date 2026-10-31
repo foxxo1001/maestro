@@ -28,6 +28,7 @@ import { useShortcuts } from '../lib/shortcuts';
 import type { ConsoleEntry, ConsoleLevel, LocalServer, Workspace } from '../../shared/types';
 import { recentPreviewUrls } from '../lib/previewRecent';
 import { copyText } from '../lib/clipboard';
+import { t } from '../../shared/i18n';
 
 type Rect = { x: number; y: number; width: number; height: number };
 const rectOf = (r: DOMRect): Rect => ({ x: r.left, y: r.top, width: r.width, height: r.height });
@@ -182,7 +183,7 @@ export default function PreviewSurface({ workspace, active }: { workspace: Works
     <div className="flex h-full min-w-0 flex-col bg-bg">
       {/* toolbar */}
       <div className="flex h-11 shrink-0 items-center gap-1 border-b px-2.5">
-        <ToolbarBtn title="Back" disabled={!preview?.canGoBack} onClick={() => navigate('back')}>
+        <ToolbarBtn title={t("Back")} disabled={!preview?.canGoBack} onClick={() => navigate('back')}>
           <ChevronLeft size={15} />
         </ToolbarBtn>
         <ToolbarBtn title="Forward" disabled={!preview?.canGoForward} onClick={() => navigate('forward')}>
@@ -315,8 +316,8 @@ export default function PreviewSurface({ workspace, active }: { workspace: Works
               <span className="min-w-0 flex-1 truncate">
                 {err.description} ({err.code}) — {err.url}
               </span>
-              <button className="btn btn-ghost h-6 px-2 text-2xs" onClick={() => navigate('goto', err.url)}>
-                Retry
+              <button className="btn btn-ghost h-6 px-2 text-2xs" onClick={() => navigate('goto', err.url)}>{t("Retry")}
+                
               </button>
             </div>
           )
@@ -479,7 +480,7 @@ function ErrorCard({
             <Play size={12} /> Start dev server
           </button>
           <button className="btn h-7 gap-1.5 text-xs" onClick={onRetry}>
-            <RotateCw size={12} /> Retry
+            <RotateCw size={12} />{t("Retry")} 
           </button>
         </div>
         <OtherPages workspace={workspace} />
@@ -537,7 +538,7 @@ function ConsoleDrawer({ wsId, agentId, onClose }: { wsId: string; agentId: numb
         />
         <div className="flex-1" />
         <button className="btn btn-ghost h-6 gap-1 px-2 text-2xs" title="Stage the console in the composer" onClick={() => void sendToAgent()}>
-          <Terminal size={11} /> Send to agent
+          <Terminal size={11} />{t("Send to agent")} 
         </button>
         <button className="btn btn-ghost h-6 gap-1 px-2 text-2xs" onClick={clear}>
           <Trash2 size={11} /> Clear

@@ -19,6 +19,7 @@ import {
   type IssueListItem,
   type PrListItem,
 } from '../../shared/types';
+import { t } from '../../shared/i18n';
 
 type FromMode = 'base' | 'branch' | 'pr' | 'issue' | 'linear';
 
@@ -146,17 +147,17 @@ export default function NewWorkspaceModal() {
     if (busy) return;
     let from: CreateFrom | undefined;
     if (fromMode === 'branch') {
-      if (!fromRef) return toast('error', 'Pick a branch');
+      if (!fromRef) return toast('error', t("Pick a branch"));
       from = { type: 'branch', ref: fromRef };
     } else if (fromMode === 'pr') {
-      if (!fromRef) return toast('error', 'Pick a pull request');
+      if (!fromRef) return toast('error', t("Pick a pull request"));
       from = { type: 'pr', ref: parseInt(fromRef, 10) };
     } else if (fromMode === 'issue') {
-      if (!fromRef) return toast('error', 'Pick an issue');
+      if (!fromRef) return toast('error', t("Pick an issue"));
       from = { type: 'issue', ref: parseInt(fromRef, 10) };
     } else if (fromMode === 'linear') {
-      if (!fromRef.trim()) return toast('error', 'Enter a Linear issue ID (e.g. ENG-123)');
-      if (!settings.linearToken.trim()) return toast('error', 'Add a Linear API token in Settings → Integrations first');
+      if (!fromRef.trim()) return toast('error', t("Enter a Linear issue ID (e.g. ENG-123)"));
+      if (!settings.linearToken.trim()) return toast('error', t("Add a Linear API token in Settings → Integrations first"));
       from = { type: 'linear', ref: fromRef.trim() };
     }
     setBusy(true);
@@ -194,8 +195,8 @@ export default function NewWorkspaceModal() {
     <Modal plain onClose={() => setModal(null)} width={680} onCmdEnter={() => void create()}>
       <div className="relative" {...dropProps}>
         {dragDepth > 0 && (
-          <div className="pointer-events-none absolute -inset-2 z-40 flex items-center justify-center rounded-[16px] border-2 border-dashed border-accent/50 bg-accent-tint text-[13px] font-medium text-accent backdrop-blur-sm">
-            Drop images or files to attach
+          <div className="pointer-events-none absolute -inset-2 z-40 flex items-center justify-center rounded-[16px] border-2 border-dashed border-accent/50 bg-accent-tint text-[13px] font-medium text-accent backdrop-blur-sm">{t("Drop images or files to attach")}
+            
           </div>
         )}
       {/* header: project switcher · create-from */}
@@ -255,7 +256,7 @@ export default function NewWorkspaceModal() {
         autoFocus
         className="mt-4 w-full resize-none bg-transparent text-[15px] leading-relaxed outline-none placeholder:text-faint"
         rows={5}
-        placeholder="What do you want to work on? (drag or paste to attach images)"
+        placeholder={t("What do you want to work on? (drag or paste to attach images)")}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         onPaste={(e) => {
@@ -278,7 +279,7 @@ export default function NewWorkspaceModal() {
               <span className="max-w-[160px] truncate text-fg">{a.name}</span>
               <button
                 className="flex h-5 w-5 items-center justify-center rounded-full text-faint hover:bg-accent-soft hover:text-err"
-                title="Remove attachment"
+                title={t("Remove attachment")}
                 onClick={() => setAtts((cur) => cur.filter((_, j) => j !== i))}
               >
                 <X size={11} />
@@ -296,7 +297,7 @@ export default function NewWorkspaceModal() {
               <Spinner />
             ) : (
               <select className="input font-mono text-xs" value={fromRef} onChange={(e) => setFromRef(e.target.value)}>
-                <option value="">choose branch…</option>
+                <option value="">{t("choose branch…")}</option>
                 {branches.map((b) => (
                   <option key={b.name} value={b.name}>
                     {b.name}
@@ -322,7 +323,7 @@ export default function NewWorkspaceModal() {
               <Spinner />
             ) : (
               <select className="input text-xs" value={fromRef} onChange={(e) => setFromRef(e.target.value)}>
-                <option value="">choose issue…</option>
+                <option value="">{t("choose issue…")}</option>
                 {issues.map((i) => (
                   <option key={i.number} value={i.number}>
                     #{i.number} {i.title.slice(0, 60)}
@@ -339,7 +340,7 @@ export default function NewWorkspaceModal() {
       {/* bottom bar */}
       <div className="mt-3 flex items-center gap-1">
         <div className="relative">
-          <button className={chip} title="Model" onClick={() => setModelMenu((v) => !v)}>
+          <button className={chip} title={t("Model")} onClick={() => setModelMenu((v) => !v)}>
             <HarnessLogo harness={harness} size={13} />
             {modelLabel}
           </button>
@@ -355,9 +356,9 @@ export default function NewWorkspaceModal() {
                       <HarnessLogo harness={h.id} size={12} />
                       <span className="truncate">{h.displayName}</span>
                       {!harnessReady(h) ? (
-                        <span className="ml-auto font-normal normal-case">not installed</span>
+                        <span className="ml-auto font-normal normal-case">{t("not installed")}</span>
                       ) : (
-                        !h.installed && <span className="ml-auto font-normal normal-case text-ok">logged in</span>
+                        !h.installed && <span className="ml-auto font-normal normal-case text-ok">{t("logged in")}</span>
                       )}
                     </div>
                     {hModels.map((m) => (
@@ -392,7 +393,7 @@ export default function NewWorkspaceModal() {
 
         {effortLevel && (
           <div className="relative">
-            <button className={chip} title="Reasoning effort" onClick={() => setEffortMenu((v) => !v)}>
+            <button className={chip} title={t("Reasoning effort")} onClick={() => setEffortMenu((v) => !v)}>
               <EffortBars level={effortLevel.bars} />
               {effortLevel.label}
             </button>
@@ -414,7 +415,7 @@ export default function NewWorkspaceModal() {
         )}
 
         <div className="relative">
-          <button className={chip} title="Agent harness" onClick={() => setHarnessMenu((v) => !v)}>
+          <button className={chip} title={t("Agent harness")} onClick={() => setHarnessMenu((v) => !v)}>
             <HarnessLogo harness={harness} size={13} />
             {harnessLabel}
           </button>
@@ -436,7 +437,7 @@ export default function NewWorkspaceModal() {
                     <HarnessLogo harness={h.id} size={13} />
                     {h.displayName}
                   </span>
-                  {!h.installed && <span className="ml-auto whitespace-nowrap text-2xs text-faint">not installed</span>}
+                  {!h.installed && <span className="ml-auto whitespace-nowrap text-2xs text-faint">{t("not installed")}</span>}
                 </MenuRow>
               ))}
             </DownMenu>
@@ -468,8 +469,8 @@ export default function NewWorkspaceModal() {
                     setHostId(null);
                     setHostMenu(false);
                   }}
-                >
-                  This machine <span className="text-2xs text-faint">git worktree</span>
+                >{t("This machine")}
+                   <span className="text-2xs text-faint">{t("git worktree")}</span>
                 </MenuRow>
                 {hosts.map((h) => (
                   <MenuRow
@@ -490,8 +491,8 @@ export default function NewWorkspaceModal() {
                       setHostMenu(false);
                       setModal({ kind: 'settings', tab: 'cloud' });
                     }}
-                  >
-                    Add a server or cluster…
+                  >{t("Add a server or cluster…")}
+                    
                   </MenuRow>
                 )}
               </DownMenu>
@@ -501,7 +502,7 @@ export default function NewWorkspaceModal() {
 
         <button
           className="flex h-8 items-center gap-2 rounded-full px-2.5 text-xs text-muted hover:bg-accent-soft hover:text-fg"
-          title="Keep this dialog open to create several workspaces"
+          title={t("Keep this dialog open to create several workspaces")}
           onClick={() => setCreateMore((v) => !v)}
         >
           <span className={clsx('relative h-4 w-7 rounded-full transition-colors', createMore ? 'bg-accent' : 'bg-border')}>
@@ -511,8 +512,8 @@ export default function NewWorkspaceModal() {
                 createMore ? 'translate-x-3.5' : 'translate-x-0.5'
               )}
             />
-          </span>
-          Create more
+          </span>{t("Create more")}
+          
         </button>
 
         <button className="btn btn-accent h-9 gap-2 pl-4 pr-3 text-[13px]" disabled={busy} onClick={() => void create()}>

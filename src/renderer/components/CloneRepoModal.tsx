@@ -6,6 +6,7 @@ import { tryInvoke } from '../lib/api';
 import { useApp } from '../store/app';
 import { FolderField, finishProjectAdd, Modal, Spinner, useProjectParentDir } from './common';
 import type { RecentRepo } from '../../shared/types';
+import { t } from '../../shared/i18n';
 
 /** Anything that should be cloned verbatim rather than treated as a search. */
 const isUrl = (q: string) => /^(https?:\/\/|git@|ssh:\/\/)/i.test(q) || q.endsWith('.git');
@@ -169,8 +170,8 @@ export default function CloneRepoModal() {
                   <div className="flex items-center justify-between gap-3 px-3 py-3">
                     <span className="text-xs text-muted">Sign in with GitHub to see and clone your repos.</span>
                     <button className="btn shrink-0" onClick={() => void useApp.getState().startGithubSignIn()}>
-                      <GitHubMark size={13} />
-                      Sign in with GitHub
+                      <GitHubMark size={13} />{t("Sign in with GitHub")}
+                      
                     </button>
                   </div>
                 ))}

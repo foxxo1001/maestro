@@ -15,6 +15,7 @@ import { EmptyHint, Segmented, Spinner } from './common';
 import ChangedFileTree, { StatusGlyph } from './ChangedFileTree';
 import type { DiffComment, DiffFile, DiffLine, Workspace } from '../../shared/types';
 import { Chevron } from '../../shared/ui/primitives';
+import { t } from '../../shared/i18n';
 
 type ViewMode = 'unified' | 'split';
 
@@ -477,8 +478,8 @@ function CommentThread({ ctx, line, showDraft }: { ctx: CommentCtx; line: DiffLi
             <button className="btn btn-accent h-6 text-2xs" onClick={() => void submit()} disabled={!text.trim()}>
               Comment
             </button>
-            <button className="btn btn-ghost h-6 text-2xs" onClick={() => ctx.setDraft(null)}>
-              Cancel
+            <button className="btn btn-ghost h-6 text-2xs" onClick={() => ctx.setDraft(null)}>{t("Cancel")}
+              
             </button>
           </div>
         </div>

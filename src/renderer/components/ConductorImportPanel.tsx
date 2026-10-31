@@ -4,6 +4,7 @@ import { useApp } from '../store/app';
 import { Spinner } from './common';
 import type { ConductorProjectPreview, ConductorSelection } from '../../shared/types';
 import { Chevron } from '../../shared/ui/primitives';
+import { t } from '../../shared/i18n';
 
 const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 
@@ -114,8 +115,8 @@ export default function ConductorImportPanel({ hideTitle }: { hideTitle?: boolea
           <span className="flex items-center gap-2 text-muted">
             <AlertTriangle size={14} className="text-warn" /> Couldn’t read your Conductor projects.
           </span>
-          <button className="btn shrink-0" onClick={() => void doScan(true)}>
-            Retry
+          <button className="btn shrink-0" onClick={() => void doScan(true)}>{t("Retry")}
+            
           </button>
         </div>
       );

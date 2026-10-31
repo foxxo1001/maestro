@@ -5,6 +5,7 @@ import { useApp } from '../store/app';
 import { Spinner, Toggle } from './common';
 import type { HarnessSyncGroup } from '../../shared/types';
 import { Chevron } from '../../shared/ui/primitives';
+import { t } from '../../shared/i18n';
 
 // The "Sync chats from Claude Code & Codex" panel (docs/specs/harness-chat-sync.md
 // §4.1). Layout mirrors ConductorImportPanel: read-only scan, preview grouped by
@@ -113,8 +114,8 @@ export default function HarnessSyncPanel({ hideTitle }: { hideTitle?: boolean })
       return (
         <div className="flex flex-col items-center gap-3 rounded-card border border-border/70 bg-raised p-6 text-center text-[13px] text-muted">
           <div>Couldn’t scan Claude Code / Codex chats.</div>
-          <button className="btn" onClick={() => void doScan(true)}>
-            Retry
+          <button className="btn" onClick={() => void doScan(true)}>{t("Retry")}
+            
           </button>
         </div>
       );
@@ -160,7 +161,7 @@ export default function HarnessSyncPanel({ hideTitle }: { hideTitle?: boolean })
     <div className="overflow-hidden rounded-card border border-border/70 bg-raised">
       <div className="flex items-center justify-between gap-3 px-4 pb-3 pt-3.5">
         <div className="min-w-0">
-          {!hideTitle && <div className="text-[13px] font-semibold tracking-tight">Sync chats from Claude Code & Codex</div>}
+          {!hideTitle && <div className="text-[13px] font-semibold tracking-tight">{t("Sync chats from Claude Code & Codex")}</div>}
           <div className="text-xs text-muted">
             {selectableCount > 0
               ? `Found ${selectableCount} chat${selectableCount === 1 ? '' : 's'} in ${groups.length} repo${groups.length === 1 ? '' : 's'}.`

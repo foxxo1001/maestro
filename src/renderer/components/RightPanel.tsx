@@ -57,6 +57,7 @@ import ChangedFileTree from './ChangedFileTree';
 import PtyView from './TerminalPanel';
 import type { ContextFile, FsEntry, PrStatus, Workspace } from '../../shared/types';
 import { copyText } from '../lib/clipboard';
+import { t as zh } from '../../shared/i18n';
 
 export default function RightPanel({ workspace }: { workspace: Workspace }) {
   const rightTab = useApp((s) => s.rightTab[workspace.id] ?? 'status');
@@ -141,7 +142,7 @@ export default function RightPanel({ workspace }: { workspace: Workspace }) {
         <div className="flex shrink-0 items-center gap-1.5 px-3 pb-2.5">
           <button
             className="shrink-0 rounded-full p-1 text-muted transition-colors hover:bg-accent-soft hover:text-fg"
-            title="Collapse panel"
+            title={zh("Collapse panel")}
             onClick={() => void useApp.getState().saveSettings({ rightPanelCollapsed: true })}
           >
             <PanelRightClose size={15} />
@@ -232,7 +233,7 @@ function CollapsedRightPanel({ workspace }: { workspace: Workspace }) {
       {showPr && <CollapsedPrButton workspace={workspace} />}
       <button
         className="no-drag mb-1.5 mt-1 grid h-8 w-8 place-items-center rounded-full text-muted transition-colors hover:bg-accent-soft hover:text-fg"
-        title="Expand panel"
+        title={zh("Expand panel")}
         onClick={() => expand()}
       >
         <PanelRightOpen size={16} />
@@ -320,7 +321,7 @@ function PanelIconBtn({ title, onClick, children }: { title: string; onClick: ()
  *  applies. */
 function ArchiveAction({ workspace }: { workspace: Workspace }) {
   return (
-    <PanelIconBtn title="Archive workspace" onClick={() => void useApp.getState().archiveWorkspace(workspace.id)}>
+    <PanelIconBtn title={zh("Archive workspace")} onClick={() => void useApp.getState().archiveWorkspace(workspace.id)}>
       <Archive size={13} />
     </PanelIconBtn>
   );
@@ -338,7 +339,7 @@ function PrActions({ workspace }: { workspace: Workspace }) {
   const hasChanges = useHasChanges(workspace.id);
 
   const archiveIcon = (
-    <PanelIconBtn title="Archive workspace" onClick={() => void useApp.getState().archiveWorkspace(workspace.id)}>
+    <PanelIconBtn title={zh("Archive workspace")} onClick={() => void useApp.getState().archiveWorkspace(workspace.id)}>
       <Archive size={13} />
     </PanelIconBtn>
   );
@@ -374,11 +375,11 @@ function PrActions({ workspace }: { workspace: Workspace }) {
           as="button"
           tone="merged"
           className="btn h-7 shrink-0 gap-1.5 px-3 text-xs"
-          title="Archive this workspace"
+          title={zh("Archive this workspace")}
           onClick={() => void useApp.getState().archiveWorkspace(workspace.id)}
         >
-          <Archive size={12} />
-          Archive
+          <Archive size={12} />{zh("Archive")}
+          
         </StainedGlass>
       </>
     );
@@ -392,11 +393,11 @@ function PrActions({ workspace }: { workspace: Workspace }) {
           as="button"
           tone="ink"
           className="btn h-7 shrink-0 gap-1.5 px-3 text-xs"
-          title="Archive this workspace"
+          title={zh("Archive this workspace")}
           onClick={() => void useApp.getState().archiveWorkspace(workspace.id)}
         >
-          <Archive size={12} />
-          Archive
+          <Archive size={12} />{zh("Archive")}
+          
         </StainedGlass>
       </>
     );
@@ -436,10 +437,10 @@ function ResolveConflictsButton({ workspace, pr }: { workspace: Workspace; pr: P
         href={pr.url}
         target="_blank"
         rel="noreferrer"
-        title="This PR has merge conflicts — open it on GitHub to resolve"
+        title={zh("This PR has merge conflicts — open it on GitHub to resolve")}
       >
-        <GitMerge size={12} />
-        Resolve conflicts
+        <GitMerge size={12} />{zh("Resolve conflicts")}
+        
       </StainedGlass>
     );
   }
@@ -513,7 +514,7 @@ function MergeButton({ workspace, pr }: { workspace: Workspace; pr: PrStatus }) 
       ripple={merging}
       className="btn h-7 shrink-0 gap-1.5 px-3 text-xs"
       disabled={merging}
-      title="Squash & merge this PR"
+      title={zh("Squash & merge this PR")}
       onClick={() => void merge()}
     >
       {merging ? <Spinner className="!text-white" /> : <GitMerge size={12} />}
@@ -527,7 +528,7 @@ function ContinueButton({ workspace }: { workspace: Workspace }) {
   return (
     <button
       className="btn h-7 shrink-0 gap-1.5 px-3 text-xs"
-      title="Keep this workspace and start a fresh branch off the updated base"
+      title={zh("Keep this workspace and start a fresh branch off the updated base")}
       disabled={continuing}
       onClick={async () => {
         setContinuing(true);
@@ -615,7 +616,7 @@ function CollapsedPrButton({ workspace }: { workspace: Workspace }) {
             <>
               <span className="text-ok">+{fmtStat(stat.additions)}</span>{' '}
               <span className="text-err">−{fmtStat(stat.deletions)}</span>
-              <span className="font-sans text-faint"> vs base</span>
+              <span className="font-sans text-faint">{zh("vs base")} </span>
             </>
           ) : (
             <span className="font-sans text-faint">{hasChanges ? 'Uncommitted changes' : 'No changes yet'}</span>
@@ -656,7 +657,7 @@ function ChangesTab({ workspace }: { workspace: Workspace }) {
         {project?.kind === 'folder' ? (
           <button
             className="btn h-6 gap-1 px-2.5 text-2xs"
-            title="Restore tracked files to the last checkpoint (new files are kept)"
+            title={zh("Restore tracked files to the last checkpoint (new files are kept)")}
             onClick={() =>
               useApp.getState().setModal({
                 kind: 'confirm',
@@ -668,14 +669,14 @@ function ChangesTab({ workspace }: { workspace: Workspace }) {
                   const r = await tryInvoke('workspace:revertCheckpoint', { workspaceId: workspace.id });
                   if (r.error || !r.data?.ok) useApp.getState().toast('error', r.error ?? r.data?.error ?? 'Revert failed');
                   else {
-                    useApp.getState().toast('success', 'Reverted to last checkpoint');
+                    useApp.getState().toast('success', zh("Reverted to last checkpoint"));
                     void useApp.getState().refreshDiff(workspace.id);
                   }
                 },
               })
             }
           >
-            <History size={11} /> Revert
+            <History size={11} />{zh("Revert")} 
           </button>
         ) : (
           gitStatus && (
@@ -707,7 +708,7 @@ function ChangesTab({ workspace }: { workspace: Workspace }) {
 
       {/* changed files */}
       <div className="-mx-1 space-y-px">
-        {files.length === 0 && <div className="px-3 py-6 text-center text-xs text-faint">No changes yet.</div>}
+        {files.length === 0 && <div className="px-3 py-6 text-center text-xs text-faint">{zh("No changes yet.")}</div>}
         <ChangedFileTree
           files={files.slice(0, 100)}
           onSelect={(f) => useApp.getState().revealDiffFile(workspace.id, f.path)}
@@ -725,8 +726,8 @@ function ChangesTab({ workspace }: { workspace: Workspace }) {
             <span className="flex items-center gap-1.5 text-xs font-medium text-muted">
               <MessageSquare size={11} className="text-faint" /> Comments ({unresolved.length})
             </span>
-            <button className="btn h-6 px-2.5 text-2xs" onClick={() => useApp.getState().sendCommentsToAgent(workspace.id)}>
-              Send to agent
+            <button className="btn h-6 px-2.5 text-2xs" onClick={() => useApp.getState().sendCommentsToAgent(workspace.id)}>{zh("Send to agent")}
+              
             </button>
           </div>
           {unresolved.slice(0, 6).map((c) => (
@@ -1196,7 +1197,7 @@ function FilesTab({ workspace }: { workspace: Workspace }) {
       {/* New file needs the local editor + filesystem, so remote workspaces skip it. */}
       {!isRemote && (
         <div className="flex items-center justify-between pb-1 pl-2.5 pr-1">
-          <span className="text-2xs text-faint">Working tree</span>
+          <span className="text-2xs text-faint">{zh("Working tree")}</span>
           <button
             className="rounded-full p-1 text-muted transition-colors hover:bg-accent-soft hover:text-fg"
             title="New file (end with / for a folder)"
@@ -1214,8 +1215,8 @@ function FilesTab({ workspace }: { workspace: Workspace }) {
           onCancel={() => setCreating(null)}
         />
       )}
-      {!rootLoaded && <div className="px-2.5 py-3 text-xs text-faint">Loading…</div>}
-      {rootLoaded && rows.length === 0 && <div className="px-2.5 py-3 text-xs text-faint">Empty working tree.</div>}
+      {!rootLoaded && <div className="px-2.5 py-3 text-xs text-faint">{zh("Loading…")}</div>}
+      {rootLoaded && rows.length === 0 && <div className="px-2.5 py-3 text-xs text-faint">{zh("Empty working tree.")}</div>}
       <div
         ref={treeElRef}
         role="tree"
@@ -1699,7 +1700,7 @@ function Dock({ workspace }: { workspace: Workspace }) {
                 {t.closable && (
                   <button
                     className="mr-1 grid h-5 w-5 place-items-center rounded-full text-faint opacity-0 transition-opacity hover:bg-accent-soft hover:text-err group-hover:opacity-100"
-                    title="Close terminal"
+                    title={zh("Close terminal")}
                     onClick={(e) => {
                       e.stopPropagation();
                       if (t.id.startsWith('rs:')) useApp.getState().closeRunTab(workspace.id, t.id.slice(3));
@@ -1715,7 +1716,7 @@ function Dock({ workspace }: { workspace: Workspace }) {
         </LiquidGlass>
         <button
           className="grid h-7 w-7 place-items-center rounded-full text-muted transition-colors hover:bg-accent-soft hover:text-fg"
-          title="New terminal"
+          title={zh("New terminal")}
           onClick={() => useApp.getState().addDockTerminal(workspace.id)}
         >
           <Plus size={12} />

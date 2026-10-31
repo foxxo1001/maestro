@@ -10,6 +10,7 @@ import PtyView from './TerminalPanel';
 import { LiquidGlass } from '../../shared/ui/LiquidGlass';
 import maestroLogo from '../assets/maestro-logo.png';
 import type { GlobalSettings, HarnessAuth, HarnessId, HarnessInfo } from '../../shared/types';
+import { t } from '../../shared/i18n';
 
 type Step = 0 | 1 | 2;
 
@@ -56,8 +57,8 @@ export default function SetupWizard() {
     <div className="wash-hero flex h-full flex-col">
       <div className="drag-region flex h-11 shrink-0 items-center justify-end px-3">
         {step < 2 && (
-          <button className="btn btn-ghost no-drag wco-safe text-muted hover:text-fg" onClick={() => finish(true)}>
-            Skip setup
+          <button className="btn btn-ghost no-drag wco-safe text-muted hover:text-fg" onClick={() => finish(true)}>{t("Skip setup")}
+            
           </button>
         )}
       </div>
@@ -74,7 +75,7 @@ export default function SetupWizard() {
             <div className="flex-1">
               {step > 0 && (
                 <button className="btn btn-ghost h-9 gap-1 px-3.5 text-[13px] text-muted hover:text-fg" onClick={() => setStep((step - 1) as Step)}>
-                  <ChevronLeft size={13} /> Back
+                  <ChevronLeft size={13} />{t("Back")} 
                 </button>
               )}
             </div>
@@ -116,7 +117,7 @@ function WelcomeStep() {
       >
         <img src={maestroLogo} alt="" className="h-12 w-12" />
       </LiquidGlass>
-      <h1 className="text-3xl font-semibold tracking-tight">Welcome to Maestro</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">{t("Welcome to Maestro")}</h1>
       <p className="mx-auto mt-3 max-w-[420px] text-[14px] leading-relaxed text-muted">
         Run a fleet of coding agents in parallel — each in an isolated git worktree with its own branch, terminal, and
         diff.
@@ -155,7 +156,7 @@ function AgentsStep({
 
   return (
     <div>
-      <h1 className="text-center text-2xl font-semibold tracking-tight">Connect your coding agents</h1>
+      <h1 className="text-center text-2xl font-semibold tracking-tight">{t("Connect your coding agents")}</h1>
       <p className="mx-auto mt-2.5 max-w-[440px] text-center text-[13px] leading-relaxed text-muted">
         Maestro found these CLIs on your Mac automatically. Agents you're already signed in to just work — connect the
         rest here, or later in Settings.
@@ -166,14 +167,14 @@ function AgentsStep({
           {probing ? 'Looking for installed agents…' : `${connectedCount} of ${list.length} connected`}
         </span>
         <button className="btn btn-ghost gap-1 text-muted hover:text-fg" disabled={refreshing} onClick={() => void refresh()}>
-          <RefreshCw size={11} className={refreshing ? 'spin' : undefined} /> Refresh
+          <RefreshCw size={11} className={refreshing ? 'spin' : undefined} />{t("Refresh")} 
         </button>
       </div>
 
       <LiquidGlass radius={24} bezel={22} thickness={70} tint="strong" className="p-2">
         {probing ? (
           <div className="flex items-center justify-center gap-2 py-10 text-xs text-muted">
-            <Spinner /> Detecting installed agents…
+            <Spinner />{t("Detecting installed agents…")} 
           </div>
         ) : (
           list.map((h, i) => (
@@ -194,7 +195,7 @@ function AgentsStep({
       {noneInstalled && (
         <div className="mt-3 rounded-card bg-warn/10 px-4 py-3 text-xs leading-relaxed text-muted">
           No agent CLIs found on this computer. Install one — e.g.{' '}
-          <code className="font-mono text-2xs">npm install -g @anthropic-ai/claude-code</code> — then hit Refresh.
+          <code className="font-mono text-2xs">npm install -g @anthropic-ai/claude-code</code>{t("— then hit Refresh.")} 
         </div>
       )}
     </div>
@@ -237,7 +238,7 @@ function AgentRow({
         </span>
         {connected ? (
           <span className="flex shrink-0 items-center gap-1 rounded-full bg-ok/10 px-2.5 py-1 text-2xs font-medium text-ok">
-            <Check size={11} /> Connected
+            <Check size={11} />{t("Connected")} 
           </span>
         ) : info.installed ? (
           <button className={clsx('btn h-8 shrink-0 px-3.5', open && 'btn-ghost text-muted')} onClick={onToggle}>
@@ -249,7 +250,7 @@ function AgentRow({
               'Close'
             ) : (
               <>
-                <Download size={12} /> Install
+                <Download size={12} />{t("Install")} 
               </>
             )}
           </button>
@@ -339,7 +340,7 @@ function ConnectPanel({
         <div className="space-y-2">
           {!ptyId ? (
             <div className="flex items-center justify-between gap-3">
-              <span className="text-xs text-muted">Sign in with your existing account or subscription.</span>
+              <span className="text-xs text-muted">{t("Sign in with your existing account or subscription.")}</span>
               <button className="btn btn-accent h-8 shrink-0 gap-1.5 px-3.5" onClick={() => void startLogin()}>
                 <Play size={12} /> Run {auth.loginLabel}
               </button>
@@ -347,9 +348,9 @@ function ConnectPanel({
           ) : (
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-2xs text-muted">Finish signing in below — a browser window may open.</span>
-                <button className="btn" onClick={() => void closeLogin()}>
-                  Done
+                <span className="text-2xs text-muted">{t("Finish signing in below — a browser window may open.")}</span>
+                <button className="btn" onClick={() => void closeLogin()}>{t("Done")}
+                  
                 </button>
               </div>
               <div className="h-64 overflow-hidden rounded-card border border-border/70">
@@ -431,8 +432,8 @@ function InstallPanel({
           {phase === 'failed' ? (
             "Install didn't finish — check the output below, then retry."
           ) : cmd ? (
-            <>
-              Running <code className="font-mono text-fg">{cmd}</code>
+            <>{t("Running")}
+               <code className="font-mono text-fg">{cmd}</code>
             </>
           ) : (
             'Starting install…'
@@ -440,8 +441,8 @@ function InstallPanel({
         </span>
         <div className="flex shrink-0 items-center gap-1.5">
           {phase === 'failed' && (
-            <button className="btn btn-accent" onClick={() => void start()}>
-              Retry
+            <button className="btn btn-accent" onClick={() => void start()}>{t("Retry")}
+              
             </button>
           )}
           <button className="btn btn-ghost" onClick={onClose}>
@@ -488,8 +489,8 @@ function TourStep({ heardFrom, setHeardFrom }: { heardFrom: string | null; setHe
       icon: <GitPullRequest size={17} />,
       title: 'Review and ship',
       blurb: (
-        <>
-          Follow the live diff <Kbd>⌘⇧D</Kbd>, run checks, then merge or open a PR without leaving the app.
+        <>{t("Follow the live diff")}
+           <Kbd>⌘⇧D</Kbd>{t(", run checks, then merge or open a PR without leaving the app.")}
         </>
       ),
     },
@@ -497,8 +498,8 @@ function TourStep({ heardFrom, setHeardFrom }: { heardFrom: string | null; setHe
 
   return (
     <div>
-      <h1 className="text-center text-2xl font-semibold tracking-tight">How Maestro works</h1>
-      <p className="mt-2.5 text-center text-[13px] text-muted">Four ideas and you know the whole app.</p>
+      <h1 className="text-center text-2xl font-semibold tracking-tight">{t("How Maestro works")}</h1>
+      <p className="mt-2.5 text-center text-[13px] text-muted">{t("Four ideas and you know the whole app.")}</p>
 
       <LiquidGlass radius={24} bezel={22} thickness={70} tint="strong" className="mt-8 grid grid-cols-2 gap-1 p-2">
         {items.map((it) => (
@@ -515,12 +516,12 @@ function TourStep({ heardFrom, setHeardFrom }: { heardFrom: string | null; setHe
       </LiquidGlass>
 
       <p className="mt-5 text-center text-xs text-muted">
-        <Kbd>⌘K</Kbd> opens the command palette — every action is in there.
+        <Kbd>⌘K</Kbd>{t("opens the command palette — every action is in there.")} 
       </p>
 
       {/* Optional, one tap — referrers can't see AI chats or word of mouth. */}
       <div className="mt-7 text-center">
-        <p className="text-xs text-muted">How did you hear about Maestro? (optional)</p>
+        <p className="text-xs text-muted">{t("How did you hear about Maestro? (optional)")}</p>
         <div className="mt-2.5 flex flex-wrap justify-center gap-1.5">
           {HEARD_FROM.map((o) => (
             <button

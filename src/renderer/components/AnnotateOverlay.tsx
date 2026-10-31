@@ -4,6 +4,7 @@ import { ArrowUpRight, MapPin, PenLine, Send, Square, Trash2, X } from 'lucide-r
 import { useApp, type AnnotateState } from '../store/app';
 import { annotationBody, boxFromPoints, hitTest, markPoint, type Pt } from '../lib/annotate';
 import type { AnnotationItem } from '../../shared/types';
+import { t } from '../../shared/i18n';
 
 type Tool = AnnotationItem['kind'];
 
@@ -179,11 +180,11 @@ function Overlay({ a }: { a: AnnotateState }) {
         ))}
         <div className="mx-1 h-5 w-px bg-border" />
         <span className="px-1 text-2xs text-faint">{items.length} mark{items.length === 1 ? '' : 's'}</span>
-        <button className="btn btn-ghost h-7 px-3 text-xs" onClick={() => useApp.getState().cancelAnnotate()}>
-          Cancel
+        <button className="btn btn-ghost h-7 px-3 text-xs" onClick={() => useApp.getState().cancelAnnotate()}>{t("Cancel")}
+          
         </button>
         <button className="btn btn-accent h-7 gap-1.5 px-3 text-xs disabled:opacity-40" disabled={!items.length} onClick={() => void send()}>
-          <Send size={12} /> Send to agent
+          <Send size={12} />{t("Send to agent")} 
         </button>
       </div>
     </div>
@@ -234,10 +235,10 @@ function NotePopover({
       />
       <div className="mt-2 flex items-center justify-between">
         <button className="flex items-center gap-1 text-2xs text-faint hover:text-err" onClick={onDelete}>
-          <Trash2 size={11} /> Delete
+          <Trash2 size={11} />{t("Delete")} 
         </button>
-        <button className="btn btn-ghost h-6 px-2.5 text-2xs" onClick={onClose}>
-          Done
+        <button className="btn btn-ghost h-6 px-2.5 text-2xs" onClick={onClose}>{t("Done")}
+          
         </button>
       </div>
     </div>

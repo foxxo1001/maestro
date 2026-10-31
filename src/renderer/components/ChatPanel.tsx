@@ -34,6 +34,7 @@ import { chatDisplayTitle } from '../../shared/chatTitle';
 import { matchesShortcut } from '../../shared/shortcuts';
 import { useShortcuts } from '../lib/shortcuts';
 import { ChatFindBar } from './ChatFind';
+import { t } from '../../shared/i18n';
 
 /**
  * The center chat area: the session rail on the left, then the split view — one
@@ -599,14 +600,14 @@ function ChatPane({
             <div
               className="progress-indeterminate mt-2 h-1 rounded-full"
               role="progressbar"
-              aria-label="Setting up workspace"
+              aria-label={t("Setting up workspace")}
             />
           </div>
         )}
         {empty ? (
           <EmptyHint
             icon={<MessageSquare size={26} strokeWidth={1.4} />}
-            title="Describe the task"
+            title={t("Describe the task")}
             body={
               workspace.wsKind === 'in-place'
                 ? `Your message starts ${harnessLabel(workspace)} working directly in this folder. Edits change your files in place — there's no branch or diff.`
@@ -693,7 +694,7 @@ function PaneHeader({
       )}
       <button
         className="shrink-0 rounded-full p-1 text-faint opacity-0 transition-[opacity,background-color,color] hover:bg-accent-soft hover:text-fg group-hover:opacity-100"
-        title="Maximize — show only this chat"
+        title={t("Maximize — show only this chat")}
         onClick={(e) => {
           e.stopPropagation();
           useApp.getState().soloPane(workspace.id, agentId);
@@ -703,7 +704,7 @@ function PaneHeader({
       </button>
       <button
         className="shrink-0 rounded-full p-1 text-faint opacity-0 transition-[opacity,background-color,color] hover:bg-accent-soft hover:text-err group-hover:opacity-100"
-        title="Close pane — keeps the chat in the session list"
+        title={t("Close pane — keeps the chat in the session list")}
         onClick={(e) => {
           e.stopPropagation();
           useApp.getState().closePane(workspace.id, agentId);
@@ -737,7 +738,7 @@ function FloatingPrompt({ msg, scrollRef }: { msg: ChatMessage; scrollRef: React
         <LiquidGlass radius={18} {...GLASS_FIELD} blur={4} tint="light" className="lg-float pointer-events-auto">
           <button
             className="block w-full px-3.5 py-2 text-left"
-            title="Jump to this message"
+            title={t("Jump to this message")}
             onClick={() =>
               scrollRef.current
                 ?.querySelector(`[data-user-msg="${msg.id}"]`)
@@ -850,7 +851,7 @@ function SessionRail({ workspace }: { workspace: Workspace }) {
         className="flex items-center justify-between pb-2 pl-4 pr-2.5"
         style={{ paddingTop: 'calc(var(--chrome-top, 0px) + 12px)' }}
       >
-        <span className="text-xs font-medium text-muted">Sessions</span>
+        <span className="text-xs font-medium text-muted">{t("Sessions")}</span>
         <div className="flex items-center gap-0.5">
           <div ref={historyRef} className="relative">
             <button
@@ -858,7 +859,7 @@ function SessionRail({ workspace }: { workspace: Workspace }) {
                 'flex items-center rounded-full p-1.5 transition-colors',
                 historyOpen ? 'bg-accent-soft text-fg' : 'text-muted hover:bg-accent-soft hover:text-fg'
               )}
-              title="Recently closed sessions"
+              title={t("Recently closed sessions")}
               onClick={() => setHistoryOpen((v) => !v)}
             >
               <History size={14} />
@@ -873,7 +874,7 @@ function SessionRail({ workspace }: { workspace: Workspace }) {
           </div>
           <button
             className="rounded-full p-1.5 text-muted transition-colors hover:bg-accent-soft hover:text-fg"
-            title="New chat (⌘T)"
+            title={t("New chat (⌘T)")}
             onClick={() => useApp.getState().newChat(workspace.id)}
           >
             <Plus size={14} />
@@ -930,15 +931,15 @@ function ClosedSessionsMenu({
 }) {
   return (
     <div data-motion="pop" className="glass absolute left-0 top-full z-50 mt-1.5 max-h-80 w-64 overflow-y-auto p-1">
-      <div className="px-2.5 pb-1 pt-1.5 text-xs font-medium text-faint">Recently closed</div>
+      <div className="px-2.5 pb-1 pt-1.5 text-xs font-medium text-faint">{t("Recently closed")}</div>
       {sessions.length === 0 ? (
-        <div className="px-2.5 py-2 text-xs text-faint">No recently closed sessions</div>
+        <div className="px-2.5 py-2 text-xs text-faint">{t("No recently closed sessions")}</div>
       ) : (
         sessions.map((s) => (
           <button
             key={s.id}
             className="group flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-accent-soft"
-            title="Reopen this session"
+            title={t("Reopen this session")}
             onClick={() => {
               useApp.getState().reopenChat(workspace.id, s.id);
               onReopen();
@@ -1082,7 +1083,7 @@ function SessionRow({
       {!editing && (
         <button
           className="hidden shrink-0 rounded-full p-1 text-faint transition-colors hover:bg-accent-soft hover:text-err group-hover:block"
-          title="Close chat (⌘W · reopen with ⇧⌘T)"
+          title={t("Close chat (⌘W · reopen with ⇧⌘T)")}
           onClick={(e) => {
             e.stopPropagation();
             useApp.getState().closeChat(workspace.id, id);
@@ -1095,8 +1096,8 @@ function SessionRow({
         <DetailCard rect={rect}>
           <div className="text-[13px] font-semibold leading-snug break-words">{title}</div>
           <div className="mt-2 space-y-1 border-t pt-2 text-2xs">
-            <DetailRow label="Session" value={id === 1 ? 'Main' : `Agent ${id}`} />
-            <DetailRow label="State" value={status ? INDICATOR_LABEL[status] : 'Idle'} />
+            <DetailRow label={t("Session")} value={id === 1 ? 'Main' : `Agent ${id}`} />
+            <DetailRow label={t("State")} value={status ? INDICATOR_LABEL[status] : 'Idle'} />
           </div>
           {preview && (
             <div className="mt-2 border-t pt-2 text-2xs text-muted line-clamp-4 break-words">
@@ -1254,7 +1255,7 @@ function SubagentBar({ messageId, count }: { messageId: string; count: number })
         <div data-motion="collapse" className="ml-1.5 mt-1 space-y-0.5 border-l pl-2.5">
           {list.length === 0 ? (
             <div className="flex items-center gap-1.5 px-1 py-0.5 text-2xs text-faint">
-              <Spinner className="!h-3 !w-3" /> Loading…
+              <Spinner className="!h-3 !w-3" />{t("Loading…")} 
             </div>
           ) : (
             list.map((r) => <SubagentRow key={r.id} run={r} />)

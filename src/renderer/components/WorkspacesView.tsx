@@ -14,6 +14,7 @@ import { useApp } from '../store/app';
 import { EmptyHint, Toggle } from './common';
 import { RepoIcon } from './Sidebar';
 import type { Workspace } from '../../shared/types';
+import { t } from '../../shared/i18n';
 
 /**
  * Full-panel "Workspaces" browser — a global, searchable index of every branch
@@ -99,8 +100,8 @@ export default function WorkspacesView() {
     <div data-motion="swap" className="flex h-full min-w-0 flex-col">
       {/* title + filters (also the window drag strip) */}
       <header className="drag-region flex h-14 shrink-0 items-center gap-3 px-6">
-        <h1 className="min-w-0 flex-1 truncate text-[17px] font-semibold tracking-tight">
-          Workspaces
+        <h1 className="min-w-0 flex-1 truncate text-[17px] font-semibold tracking-tight">{t("Workspaces")}
+          
           <span className="ml-2 text-[13px] font-normal text-faint">{total}</span>
         </h1>
         <div className="no-drag wco-safe flex shrink-0 items-center gap-2">
@@ -110,7 +111,7 @@ export default function WorkspacesView() {
             className="input h-8 w-auto max-w-[180px] !rounded-full !border-transparent !bg-accent-soft !py-0 !pl-3.5 text-xs"
             aria-label="Project"
           >
-            <option value="">All projects</option>
+            <option value="">{t("All projects")}</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -118,7 +119,7 @@ export default function WorkspacesView() {
             ))}
           </select>
           <label className="flex h-8 items-center gap-2 rounded-full bg-accent-soft pl-3.5 pr-2 text-xs text-muted">
-            <span>Show archived</span>
+            <span>{t("Show archived")}</span>
             {archivedCount > 0 && (
               <span
                 className="min-w-[18px] rounded-full bg-raised px-1.5 text-center text-2xs text-muted"
@@ -140,7 +141,7 @@ export default function WorkspacesView() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             spellCheck={false}
-            placeholder="Search workspaces…"
+            placeholder={t("Search workspaces…")}
             className="w-full min-w-0 bg-transparent text-[13px] text-fg outline-none placeholder:text-faint"
           />
         </div>
@@ -221,7 +222,7 @@ function WorkspaceRow({ row, now, active }: { row: WsRow; now: number; active: b
         {project && <span className="shrink-0 truncate text-2xs text-faint">{project.name}</span>}
       </span>
       {w.archived && (
-        <span className="shrink-0 rounded-full bg-accent-soft px-2 py-0.5 text-2xs text-muted">Archived</span>
+        <span className="shrink-0 rounded-full bg-accent-soft px-2 py-0.5 text-2xs text-muted">{t("Archived")}</span>
       )}
       <div className="flex shrink-0 items-center gap-1.5">
         <div className="hidden items-center gap-0.5 group-hover:flex">
@@ -229,7 +230,7 @@ function WorkspaceRow({ row, now, active }: { row: WsRow; now: number; active: b
             <>
               <RowAction
                 icon={<RotateCcw size={13} />}
-                title="Restore workspace (with chat history)"
+                title={t("Restore workspace (with chat history)")}
                 onClick={() => void useApp.getState().restoreWorkspace(w.id)}
               />
               <RowAction
@@ -254,7 +255,7 @@ function WorkspaceRow({ row, now, active }: { row: WsRow; now: number; active: b
           ) : (
             <RowAction
               icon={<Archive size={13} />}
-              title="Archive workspace"
+              title={t("Archive workspace")}
               onClick={() => void useApp.getState().archiveWorkspace(w.id)}
             />
           )}

@@ -4,6 +4,7 @@ import { useApp } from '../store/app';
 import { SettingsRow, SettingsSection } from './HarnessesSettings';
 import { Toggle } from './common';
 import type { McpServerConfig } from '../../shared/types';
+import { t } from '../../shared/i18n';
 
 /** Settings → MCP. Maestro manages the server list; the harness CLIs that
  *  support MCP (claude-code, codex) are the actual clients — each run spawns
@@ -125,7 +126,7 @@ export default function McpTab() {
   return (
     <div className="space-y-8">
       <SettingsSection
-        title="MCP servers"
+        title={t("MCP servers")}
         description="注入到支持 MCP 的 agent CLI：Claude Code 走 --mcp-config，Codex 走运行时 -c 覆盖；服务器进程由 CLI 自己拉起（仅 stdio 类型）。Kimi 暂无 MCP 入口。"
         action={
           !draft && (
