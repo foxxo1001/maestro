@@ -448,8 +448,13 @@ function CustomModelsArea({ harness }: { harness: HarnessId }) {
       .map((l) => l.trim())
       .filter(Boolean)
       .map((l) => {
-        const [id, ...rest] = l.split('|').map((s) => s.trim());
-        return { id, ...(rest.length ? { label: rest.join('|').trim() } : {}) } as ModelOption;
+        const [id, label, ctx] = l.split('|').map((s) => s.trim());
+        const n = Number(ctx);
+        return {
+          id,
+          ...(label ? { label } : {}),
+          ...(Number.isFinite(n) && n > 0 ? { contextWindow: n } : {}),
+        } as ModelOption;
       })
       .filter((m) => /^[a-zA-Z0-9._/:+-]+$/.test(m.id));
     const next = { ...(settings.customModels ?? {}) };

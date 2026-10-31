@@ -142,6 +142,38 @@ function validAccelerator(acc: string): boolean {
 
 const SHORTCUT_GROUPS = ['File', 'View', 'Workspace', 'Chat', 'Composer', 'Preview', 'Editor'] as const;
 
+/** 每模型上下文窗口覆盖（Settings → General）。存 settings.contextWindows，
+ *  effectiveHarnessModels 会把它们套到目录值上。 */
+function ContextWindowsArea() {
+  const settings = useApp((s) => s.settings);
+  const [draft, setDraft] = useState<string | null>(null);
+  const saved = settings.contextWindows ?? {};
+  const text = draft ?? Object.entries(saved).map(([k, v]) => `${k}=${v}`).join('\n');
+  const save = async () => {
+    if (draft === null) return;
+    const next: Record<string, number> = {};
+    for (const line of draft.split('\n')) {
+      const t2 = line.trim();
+      if (!t2) continue;
+      const eq = t2.indexOf('=');
+      const id = t2.slice(0, eq).trim();
+      const n = Number(t2.slice(eq + 1).trim());
+      if (eq > 0 && /^[a-zA-Z0-9._/:+-]+$/.test(id) && Number.isFinite(n) && n > 0) next[id] = n;
+    }
+    await useApp.getState().saveSettings({ contextWindows: next });
+    setDraft(null);
+  };
+  return (
+    <textarea
+      className="input h-20 resize-y font-mono"
+      value={text}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => void save()}
+      placeholder={'grok-4.7=256000'}
+    />
+  );
+}
+
 function ShortcutsTab() {
   const overrides = useApp((s) => s.settings.shortcuts);
   const platform = useApp((s) => s.platform);
@@ -405,6 +437,13 @@ function GeneralTab() {
           description="Stop a process an agent started when it is about to use up this machine's memory."
         >
           <Toggle checked={settings.memoryGuard !== false} onChange={(v) => save({ memoryGuard: v })} />
+        </SettingsRow>
+        <SettingsRow
+          stack
+          label="模型上下文窗口覆盖"
+          description="按模型 id 覆盖上下文窗口（tokens），优先于目录值。每行 model-id=200000，保存后选择器与上下文环立即生效。"
+        >
+          <ContextWindowsArea />
         </SettingsRow>
       </SettingsSection>
 

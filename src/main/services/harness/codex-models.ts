@@ -163,7 +163,7 @@ export function codexReasoningEffort(model: string, effort: string): string {
  *  the source of truth for both the renderer picker (via IPC) and main-side
  *  model validation, so the two never disagree about which models exist. */
 export function effectiveHarnessModels(): Record<HarnessId, ModelOption[]> {
-  return withCustomModels({
+  const map = withCustomModels({
     ...(HARNESS_MODELS as Record<HarnessId, ModelOption[]>),
     'claude-code': claudeLiveModels(),
     codex: codexModels(),
@@ -171,6 +171,17 @@ export function effectiveHarnessModels(): Record<HarnessId, ModelOption[]> {
     grok: grokLiveModels(),
     cursor: cursorLiveModels(),
   });
+  // User-pinned context windows win over every catalog.
+  const cw = Settings.global().contextWindows;
+  if (cw) {
+    for (const list of Object.values(map)) {
+      for (const m of list) {
+        const n = cw[m.id];
+        if (typeof n === 'number' && n > 0) m.contextWindow = n;
+      }
+    }
+  }
+  return map;
 }
 
 /** Hand-added models (Settings → Harnesses), appended after the live/built-in

@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Copy,
   ExternalLink,
+  FileCode,
   Globe,
   History,
   Lock,
@@ -62,6 +63,13 @@ export default function PreviewSurface({ workspace, active }: { workspace: Works
   const live = !!preview;
   const err = preview?.error ?? null;
   const refused = isRefused(err);
+  // Static HTML preview: when the active editor tab is an .html file, the
+  // empty card offers to render it straight off disk (maestro-local protocol).
+  const activeFile = useApp((s) => s.activeFile[wsId] ?? null);
+  const htmlFile =
+    activeFile && /\.(html?|htm)$/i.test(activeFile)
+      ? `maestro-local://f/${encodeURIComponent(`${workspace.worktreePath}/${activeFile}`)}`
+      : null;
   // The view floats above the DOM, so it must be hidden for any DOM overlay
   // (empty/error card, annotate frame, the toolbar's overflow menu) or app
   // overlay to be visible.
@@ -299,7 +307,16 @@ export default function PreviewSurface({ workspace, active }: { workspace: Works
       <div className="relative min-h-0 flex-1">
         <div ref={holderRef} className="absolute inset-0" />
 
-        {!live && <EmptyCard workspace={workspace} hasRunScript={(runScripts?.length ?? 0) > 0} onStart={startDevServer} onOpen={() => useApp.getState().openPreview(wsId)} />}
+        {!live && (
+          <EmptyCard
+            workspace={workspace}
+            hasRunScript={(runScripts?.length ?? 0) > 0}
+            onStart={startDevServer}
+            onOpen={() => useApp.getState().openPreview(wsId)}
+            htmlFile={htmlFile}
+            onOpenHtml={() => htmlFile && useApp.getState().openPreview(wsId, htmlFile)}
+          />
+        )}
 
         {live && err && (
           refused ? (
@@ -360,11 +377,15 @@ function EmptyCard({
   hasRunScript,
   onStart,
   onOpen,
+  htmlFile,
+  onOpenHtml,
 }: {
   workspace: Workspace;
   hasRunScript: boolean;
   onStart: () => void;
   onOpen: () => void;
+  htmlFile: string | null;
+  onOpenHtml: () => void;
 }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center p-6">
@@ -382,6 +403,14 @@ function EmptyCard({
             Preview anyway
           </button>
         </div>
+        {htmlFile && (
+          <div className="mt-1 flex flex-col items-center gap-2">
+            <button className="btn h-7 gap-1.5 text-xs" onClick={onOpenHtml}>
+              <FileCode size={12} /> 预览此 HTML 文件
+            </button>
+            <div className="text-2xs text-faint">无需 dev server，直接渲染当前编辑的静态页面</div>
+          </div>
+        )}
         {!hasRunScript && (
           <div className="mt-1 text-2xs text-faint">
             No run script yet — add one from the Run dock so “Start” knows how to launch your server.

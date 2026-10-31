@@ -297,11 +297,11 @@ function wireNavEvents(s: PreviewSession) {
   });
   // Popups navigate the same view instead of opening a window (§4).
   wc.setWindowOpenHandler(({ url }) => {
-    if (/^https?:/i.test(url)) void wc.loadURL(url);
+    if (/^(https?:|maestro-local:)/i.test(url)) void wc.loadURL(url);
     return { action: 'deny' };
   });
   wc.on('will-navigate', (e, url) => {
-    if (!/^https?:/i.test(url)) e.preventDefault();
+    if (!/^(https?:|maestro-local:)/i.test(url)) e.preventDefault();
   });
   // Leaving a page with a beforeunload handler is auto-allowed (§12).
   wc.on('will-prevent-unload', (e) => e.preventDefault());

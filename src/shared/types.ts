@@ -401,6 +401,9 @@ export interface GlobalSettings {
    *  live/built-in catalogs — the escape hatch for brand-new models no CLI
    *  catalog lists yet. */
   customModels?: Partial<Record<HarnessId, ModelOption[]>>;
+  /** Per-model context-window overrides (Settings → General): model id →
+   *  tokens. Applied on top of whatever the catalogs report. */
+  contextWindows?: Record<string, number>;
   /** User's orchestrator + specialist stack. Per-role, per-field overrides of
    *  DEFAULT_ROLES (harness/model/effort/instructions/label/blurb), keyed by role
    *  id; also holds the full definition of each user-created role. Global across

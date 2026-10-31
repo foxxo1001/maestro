@@ -30,6 +30,7 @@ import { disposeAllHosts } from './hosts';
 import { checkForUpdatesFromMenu, initUpdater } from './services/updater';
 import { initScheduler } from './services/schedule';
 import { initAnalytics, shutdownAnalytics } from './services/analytics';
+import { registerWorkspaceProtocol, registerWorkspaceProtocolScheme } from './services/localFiles';
 import { MIN_LAYOUT_SIZE, TITLE_BAR_HEIGHT, ZOOM_STEP, nudgeZoom, restoreZoom, setZoom } from './services/zoom';
 
 const isSmoke = process.argv.includes('--smoke');
@@ -502,6 +503,9 @@ function buildMenu() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
+// Privileged-scheme registration must happen before ready (localFiles.ts).
+registerWorkspaceProtocolScheme();
+
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock && !isSmoke) {
   // Handing off to the instance that owns the lock (see 'second-instance'), so
@@ -614,6 +618,7 @@ if (!gotLock && !isSmoke) {
     step('initScheduler', initScheduler);
     step('initUpdater', initUpdater);
     step('initAnalytics', initAnalytics);
+    step('registerWorkspaceProtocol', registerWorkspaceProtocol);
     // Refresh the Codex model catalog from its backend at boot (§6) — but only if
     // codex is installed; don't spawn a binary that isn't there. Throttled + silent
     // inside, so this is fire-and-forget.
