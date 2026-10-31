@@ -7,7 +7,7 @@ import { tryInvoke } from './api';
  * same directory.
  */
 export async function staticPreviewUrl(absPath: string): Promise<string | null> {
-  const { data } = await tryInvoke('preview:staticPort');
+  const { data } = await tryInvoke('preview:staticPort', {});
   const port = data;
   if (!port) return null;
   const segs = absPath
