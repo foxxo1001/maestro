@@ -2299,6 +2299,14 @@ export interface IpcInvokeMap {
   'preview:setBounds': [{ workspaceId: string; bounds: Rect }, void];
   /** Summarize the chat and continue from a fresh session. */
   'chat:compact': [{ workspaceId: string; agentId: number }, { ok: boolean; error?: string }];
+  /** Settings → Skills: user-scope skill management without a workspace. */
+  'skills:managerList': [{ harness: HarnessId }, SkillEntry[]];
+  'skills:managerRead': [{ harness: HarnessId; path: string }, { markdown: string }];
+  'skills:managerSave': [
+    { harness: HarnessId; location: SkillLocation; markdown: string; prevPath?: string },
+    SkillEntry
+  ];
+  'skills:managerDelete': [{ harness: HarnessId; path: string }, void];
   /** Port of the local static preview server (127.0.0.1, started at boot). */
   'preview:staticPort': [{}, number];
   'preview:setVisible': [{ workspaceId: string; visible: boolean }, void];

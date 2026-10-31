@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import {
   Blocks,
   CircleUser,
+  Sparkles,
   Cloud,
   Cpu,
   FolderGit2,
@@ -25,6 +26,7 @@ import { hostLabel } from '../lib/hosts';
 import { timeAgo } from '../../shared/ui/format';
 import HarnessesTab, { SettingsRow, SettingsSection } from './HarnessesSettings';
 import McpTab from './McpSettings';
+import SkillsManagerTab from './SkillsSettings';
 import { t } from '../../shared/i18n';
 import { ThemePicker } from '../../shared/ui/ThemePicker';
 import { normalizeColorTheme } from '../../shared/themes';
@@ -41,7 +43,7 @@ import type {
   UpdateCheckOutcome,
 } from '../../shared/types';
 
-type Tab = 'general' | 'harnesses' | 'mcp' | 'shortcuts' | 'repository' | 'integrations' | 'cloud' | 'account';
+type Tab = 'general' | 'harnesses' | 'mcp' | 'skills' | 'shortcuts' | 'repository' | 'integrations' | 'cloud' | 'account';
 
 // Left-nav groups (sentence case).
 const NAV: { group: string; items: [Tab, string, typeof Cpu][] }[] = [
@@ -57,6 +59,7 @@ const NAV: { group: string; items: [Tab, string, typeof Cpu][] }[] = [
     group: 'Connections',
     items: [
       ['mcp', 'MCP', Blocks],
+      ['skills', 'Skills', Sparkles],
       ['integrations', 'Integrations', Plug],
       ['cloud', 'Cloud', Cloud],
       ['account', 'Account', CircleUser],
@@ -115,6 +118,7 @@ export default function SettingsModal() {
             {tab === 'general' && <GeneralTab />}
             {tab === 'harnesses' && <HarnessesTab />}
             {tab === 'mcp' && <McpTab />}
+            {tab === 'skills' && <SkillsManagerTab />}
             {tab === 'shortcuts' && <ShortcutsTab />}
             {tab === 'cloud' && <CloudTab />}
             {tab === 'account' && <AccountTab />}

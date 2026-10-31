@@ -442,14 +442,34 @@ export default function Composer({
     });
   };
 
-  const insertSkill = (s: SkillEntry) => {
-    const ta = taRef.current!;
-    const next = '/' + s.name + ' ' + text.slice(ta.selectionStart);
-    setText(next);
+  const insertSkill = async (s: SkillEntry) => {
     setSlash(null);
+    const ta = taRef.current!;
+    const rest = text.slice(ta.selectionStart);
+    // Grok's CLI has no skill loader — inline the skill's markdown so the
+    // instructions ride the prompt itself. Other harnesses resolve /name
+    // natively from their own skill folders.
+    if (workspace.harness !== 'grok') {
+      const next = '/' + s.name + ' ' + rest;
+      setText(next);
+      requestAnimationFrame(() => {
+        ta.focus();
+        const pos = s.name.length + 2;
+        ta.setSelectionRange(pos, pos);
+      });
+      return;
+    }
+    const { data, error } = await tryInvoke('skill:read', { workspaceId: workspace.id, path: s.path });
+    if (error || !data) {
+      useApp.getState().toast('error', error ?? '技能内容读取失败');
+      return;
+    }
+    const md = data.markdown.trim();
+    const next = `${md}\n\n---\n\n请严格按照上面的「${s.name}」技能说明执行。任务：${rest}`;
+    setText(next);
     requestAnimationFrame(() => {
       ta.focus();
-      const pos = s.name.length + 2;
+      const pos = next.length;
       ta.setSelectionRange(pos, pos);
     });
   };
@@ -537,7 +557,7 @@ export default function Composer({
       if (e.key === 'Tab' || e.key === 'Enter') {
         e.preventDefault();
         const pick = slashMatches[slashIdx] ?? slashMatches[0];
-        if (pick) insertSkill(pick.s);
+        if (pick) void insertSkill(pick.s);
         return;
       }
       if (e.key === 'Escape') {
@@ -828,7 +848,7 @@ export default function Composer({
                     i === slashIdx ? 'bg-accent-soft' : ''
                   )}
                   onMouseEnter={() => setSlashIdx(i)}
-                  onClick={() => insertSkill(m.s)}
+                  onClick={() => void insertSkill(m.s)}
                 >
                   <span className="shrink-0 font-mono text-xs text-faint">/</span>
                   <span className="shrink-0 text-[13px] font-medium">

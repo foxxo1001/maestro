@@ -3,6 +3,7 @@ import nodePath from 'path';
 import { app, clipboard, dialog, ipcMain, shell } from 'electron';
 import { run } from './exec';
 import { broadcast, getWindow, rebuildMenu } from './bus';
+import os from 'os';
 import { Comments, Hosts, Messages, Projects, Scheduled, Settings, Subagents, Todos, Workspaces, mustWorkspace, mustProject, now, uid } from './db';
 import * as git from './services/git';
 import * as files from './services/files';
@@ -850,6 +851,17 @@ function registerSkillIpc() {
     saveSkill(mustWorkspace(workspaceId), location, markdown, prevPath)
   );
   handle('skill:delete', ({ workspaceId, path }) => deleteSkill(mustWorkspace(workspaceId), path));
+
+  // Settings → Skills: manage user-scope skills with no workspace open. The
+  // stub workspace's tmp worktree simply yields an empty project-scope scan.
+  const skillsStubWs = (harness: HarnessId): Workspace =>
+    ({ id: '__skills_manager__', harness, worktreePath: os.tmpdir() }) as unknown as Workspace;
+  handle('skills:managerList', ({ harness }) => listSkills(skillsStubWs(harness)));
+  handle('skills:managerRead', ({ harness, path }) => readSkill(skillsStubWs(harness), path));
+  handle('skills:managerSave', ({ harness, location, markdown, prevPath }) =>
+    saveSkill(skillsStubWs(harness), location, markdown, prevPath)
+  );
+  handle('skills:managerDelete', ({ harness, path }) => deleteSkill(skillsStubWs(harness), path));
 }
 
 function registerSettingsIpc() {
