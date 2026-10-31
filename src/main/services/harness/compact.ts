@@ -30,10 +30,13 @@ export async function compactChat(
 
   const msgs = Messages.list(workspaceId).filter((m) => m.agentId === agentId);
   if (!msgs.length) return { ok: false, error: '没有可压缩的历史' };
+  // Arg-based CLIs (kimi/cursor) hit the Windows ~32k command-line cap; the
+  // others take the prompt via stdin or --prompt-file and can take the full log.
+  const argBased = ws.harness === 'kimi-code' || ws.harness === 'cursor';
   const transcript = msgs
     .map((m) => `${m.role === 'user' ? '用户' : '助手'}: ${m.content.slice(0, PER_MSG_CHARS)}`)
     .join('\n\n')
-    .slice(-MAX_TRANSCRIPT_CHARS);
+    .slice(argBased ? -20_000 : -MAX_TRANSCRIPT_CHARS);
 
   const prompt = [
     '把下面的 agent 会话记录压缩成一份可延续工作的交接摘要（中文），供在全新上下文里继续任务。',

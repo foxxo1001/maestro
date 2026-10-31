@@ -17,6 +17,7 @@ import {
   Repeat,
   Server,
   AlertTriangle,
+  X,
 } from 'lucide-react';
 import { tryInvoke } from '../lib/api';
 import { hostAddress } from '../lib/hosts';
@@ -293,28 +294,38 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
                   <EditorSurface workspace={workspace} active />
                 </React.Suspense>
               )}
-              {htmlAbs && (
-                <div className="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-full bg-raised/90 p-[2px] shadow-sm backdrop-blur">
-                  <button
-                    className={clsx(
-                      'rounded-full px-2 py-0.5 text-2xs',
-                      splitPane === 'editor' ? 'bg-accent-soft text-fg' : 'text-muted hover:text-fg'
-                    )}
-                    onClick={() => useApp.getState().setSplitPane(workspace.id, 'editor')}
-                  >
-                    编辑
-                  </button>
-                  <button
-                    className={clsx(
-                      'rounded-full px-2 py-0.5 text-2xs',
-                      splitPane === 'preview' ? 'bg-accent-soft text-fg' : 'text-muted hover:text-fg'
-                    )}
-                    onClick={() => useApp.getState().setSplitPane(workspace.id, 'preview')}
-                  >
-                    预览
-                  </button>
-                </div>
-              )}
+              <div className="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-full bg-raised/90 p-[3px] shadow-sm backdrop-blur">
+                {htmlAbs && (
+                  <>
+                    <button
+                      className={clsx(
+                        'rounded-full px-2 py-0.5 text-2xs',
+                        splitPane === 'editor' ? 'bg-accent-soft text-fg' : 'text-muted hover:text-fg'
+                      )}
+                      onClick={() => useApp.getState().setSplitPane(workspace.id, 'editor')}
+                    >
+                      编辑
+                    </button>
+                    <button
+                      className={clsx(
+                        'rounded-full px-2 py-0.5 text-2xs',
+                        splitPane === 'preview' ? 'bg-accent-soft text-fg' : 'text-muted hover:text-fg'
+                      )}
+                      onClick={() => useApp.getState().setSplitPane(workspace.id, 'preview')}
+                    >
+                      预览
+                    </button>
+                    <div className="mx-0.5 h-3 w-px bg-border/60" />
+                  </>
+                )}
+                <button
+                  className="grid h-5 w-5 place-items-center rounded-full text-muted transition-colors hover:bg-accent-soft hover:text-fg"
+                  title="关闭分屏（编辑器回到全宽）"
+                  onClick={() => useApp.getState().closeSplit(workspace.id)}
+                >
+                  <X size={12} />
+                </button>
+              </div>
             </div>
           </div>
         ) : (

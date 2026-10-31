@@ -1,4 +1,7 @@
 import { randomUUID } from 'crypto';
+import { writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { grokClampEffort, parseGrokLine } from '../../../shared/harness/parse';
 import { detectVersion, promptWithSystem, type BuildOpts, type HarnessAdapter } from './adapter';
 
@@ -34,7 +37,17 @@ export const grokAdapter: HarnessAdapter = {
     // --always-approve: stdin is closed for headless runs, so any approval prompt
     // would hang the turn (precedent: cursor's hardcoded --force). --no-auto-update:
     // no background update check polluting the NDJSON stream.
-    const args = ['-p', prompt, '--output-format', 'streaming-json', '--always-approve', '--no-auto-update', '-s', sessionId];
+    const args = ['--output-format', 'streaming-json', '--always-approve', '--no-auto-update', '-s', sessionId];
+    // Windows caps a process command line at ~32k chars — compact-sized prompts
+    // (whole-transcript summaries) blow past it with "Argument list too long".
+    // --prompt-file has no such limit.
+    if (prompt.length > 24_000) {
+      const file = join(tmpdir(), `maestro-grok-prompt-${randomUUID()}.txt`);
+      writeFileSync(file, prompt);
+      args.push('--prompt-file', file);
+    } else {
+      args.push('-p', prompt);
+    }
     if (opts.model) args.push('-m', opts.model);
     // Reasoning effort (§5.4). The headless flag is [verify] — `grok-4.6` supports
     // low…xhigh at the API and the TUI has `/effort`, but no flag is documented;
