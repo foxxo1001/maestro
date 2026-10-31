@@ -312,6 +312,8 @@ export interface AppState {
   /** Chat+editor split view per workspace (chat left, editor right). */
   splitEditor: Record<string, boolean>;
   splitRatioByWs: Record<string, number>;
+  /** Right pane of the split view: editor or static HTML preview. */
+  splitPane: Record<string, 'editor' | 'preview'>;
   // Whether each workspace's dev-server port is listening (§5) — drives the
   // Preview tab pulse independent of whether a preview view exists.
   portUpByWs: Record<string, boolean>;
@@ -428,6 +430,7 @@ export interface AppState {
   openSplit: (wsId: string) => void;
   closeSplit: (wsId: string) => void;
   setSplitRatio: (wsId: string, r: number) => void;
+  setSplitPane: (wsId: string, pane: 'editor' | 'preview') => void;
   /** Close an editor tab (dirty guard is enforced at the call site). Falls back
    *  to a neighbouring tab, and leaves Editor mode when the last tab closes. */
   closeFile: (wsId: string, path: string) => void;
@@ -796,6 +799,7 @@ export const useApp = create<AppState>((set, get) => {
     previewByWs: {},
     splitEditor: {},
     splitRatioByWs: {},
+    splitPane: {},
     portUpByWs: {},
     annotate: null,
     composerAttachments: savedDrafts.attachments,
@@ -1101,6 +1105,7 @@ export const useApp = create<AppState>((set, get) => {
     closeSplit: (wsId) => set((s) => ({ splitEditor: { ...s.splitEditor, [wsId]: false } })),
     setSplitRatio: (wsId, r) =>
       set((s) => ({ splitRatioByWs: { ...s.splitRatioByWs, [wsId]: Math.min(0.75, Math.max(0.25, r)) } })),
+    setSplitPane: (wsId, pane) => set((s) => ({ splitPane: { ...s.splitPane, [wsId]: pane } })),
 
     revealDiffFile: (wsId, path) => {
       set({ diffFocus: { wsId, path } });

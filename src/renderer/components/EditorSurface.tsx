@@ -467,8 +467,12 @@ export default function EditorSurface({ workspace, active }: { workspace: Worksp
           {/\.(html?|htm)$/i.test(activeFile) && (
             <button
               className="flex h-6 shrink-0 items-center gap-1 rounded-full bg-accent-soft px-2.5 font-medium text-accent transition-colors hover:opacity-90"
-              title="在 Preview 中打开此页面（无需 dev server）"
+              title={split ? '在右侧窗格预览此页面' : '在 Preview 中打开此页面（无需 dev server）'}
               onClick={async () => {
+                if (split) {
+                  useApp.getState().setSplitPane(wsId, 'preview');
+                  return;
+                }
                 const url = await staticPreviewUrl(`${workspace.worktreePath}/${activeFile}`);
                 if (url) useApp.getState().openPreview(wsId, url);
               }}

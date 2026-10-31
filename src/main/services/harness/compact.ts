@@ -42,6 +42,15 @@ export async function compactChat(
     transcript,
   ].join('\n');
 
+  // Claude Code compacts natively: '/compact' passed as the -p prompt runs the
+  // upstream-blessed in-session compaction (microcompact state preserved) and
+  // shows up as a normal, visible turn. Better than any re-implementation.
+  if (ws.harness === 'claude-code') {
+    const { startAgent } = await import('./index');
+    const r = startAgent({ workspace: ws, agentId, prompt: '/compact', systemPrompt: null });
+    return { ok: r.ok, error: r.error };
+  }
+
   const adapter = adapters[ws.harness] ?? shellAdapter;
   const { base, spawnEnv } = resolveTurn(ws, agentId, null);
   // The weakest model the harness can actually run right now (live catalog,
@@ -77,6 +86,7 @@ export async function compactChat(
   let textSeg = false;
   let newSessionId: string | null = null;
   let doneEv: { ok: boolean; error?: string } | null = null;
+  let stderrTail = '';
 
   const result = await new Promise<{ ok: boolean; error?: string }>((resolve) => {
     let settled = false;
@@ -98,10 +108,13 @@ export async function compactChat(
         else if (ev.kind === 'seg-start') textSeg = ev.segType === 'text';
         else if (ev.kind === 'seg-delta' && textSeg) summary += ev.text;
         else if (ev.kind === 'done') doneEv = { ok: ev.ok, error: ev.error };
-      }, () => {});
+      }, (chunk) => {
+        stderrTail = (stderrTail + chunk).slice(-800);
+      });
       child.onClose(() => {
-        if (doneEv && !doneEv.ok) finish({ ok: false, error: doneEv.error ?? '压缩失败' });
-        else if (!summary.trim()) finish({ ok: false, error: '压缩失败：模型没有返回摘要' });
+        const cli = stderrTail.trim() ? `｜CLI: ${stderrTail.trim().split('\n').slice(-2).join(' ').slice(0, 300)}` : '';
+        if (doneEv && !doneEv.ok) finish({ ok: false, error: (doneEv.error ?? '压缩失败') + cli });
+        else if (!summary.trim()) finish({ ok: false, error: '压缩失败：模型没有返回摘要' + cli });
         else finish({ ok: true });
       });
     } catch (err) {

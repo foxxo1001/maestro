@@ -39,6 +39,7 @@ import { t } from '../../shared/i18n';
 // The whole editor surface (Monaco + notebook renderer) is a lazy chunk — its
 // parse cost is paid on first file open, never at app startup.
 const EditorSurface = React.lazy(() => import('./EditorSurface'));
+import SplitHtmlPreview from './SplitHtmlPreview';
 // The Preview surface (embedded browser toolbar + annotate canvas) is likewise a
 // lazy chunk — zero cost until the surface is first opened (§5.1, §13).
 const PreviewSurface = React.lazy(() => import('./PreviewSurface'));
@@ -47,6 +48,10 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
   const tab = useApp((s) => s.tabByWs[workspace.id] ?? 'chat');
   const split = useApp((s) => s.splitEditor[workspace.id] ?? false);
   const splitRatio = useApp((s) => s.splitRatioByWs[workspace.id] ?? 0.5);
+  const splitPane = useApp((s) => s.splitPane[workspace.id] ?? 'editor');
+  const activeFile = useApp((s) => s.activeFile[workspace.id] ?? null);
+  const htmlAbs =
+    activeFile && /\.(html?|htm)$/i.test(activeFile) ? `${workspace.worktreePath}/${activeFile}` : null;
   const running = useApp((s) => (s.runningAgents[workspace.id] ?? []).length > 0);
   const project = useApp((s) => s.projects.find((p) => p.id === workspace.projectId));
   const caps = useCaps(workspace.projectId);
@@ -275,15 +280,41 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
               }}
             />
             <div className="relative h-full min-w-0 flex-1">
-              <React.Suspense
-                fallback={
-                  <div className="flex h-full items-center justify-center gap-2 text-sm text-muted">
-                    <Spinner />{t("Loading editor…")} 
-                  </div>
-                }
-              >
-                <EditorSurface workspace={workspace} active />
-              </React.Suspense>
+              {htmlAbs && splitPane === 'preview' ? (
+                <SplitHtmlPreview absPath={htmlAbs} />
+              ) : (
+                <React.Suspense
+                  fallback={
+                    <div className="flex h-full items-center justify-center gap-2 text-sm text-muted">
+                      <Spinner />{t("Loading editor…")} 
+                    </div>
+                  }
+                >
+                  <EditorSurface workspace={workspace} active />
+                </React.Suspense>
+              )}
+              {htmlAbs && (
+                <div className="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-full bg-raised/90 p-[2px] shadow-sm backdrop-blur">
+                  <button
+                    className={clsx(
+                      'rounded-full px-2 py-0.5 text-2xs',
+                      splitPane === 'editor' ? 'bg-accent-soft text-fg' : 'text-muted hover:text-fg'
+                    )}
+                    onClick={() => useApp.getState().setSplitPane(workspace.id, 'editor')}
+                  >
+                    编辑
+                  </button>
+                  <button
+                    className={clsx(
+                      'rounded-full px-2 py-0.5 text-2xs',
+                      splitPane === 'preview' ? 'bg-accent-soft text-fg' : 'text-muted hover:text-fg'
+                    )}
+                    onClick={() => useApp.getState().setSplitPane(workspace.id, 'preview')}
+                  >
+                    预览
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ) : (
