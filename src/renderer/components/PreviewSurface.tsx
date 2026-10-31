@@ -28,6 +28,7 @@ import { matchesShortcut } from '../../shared/shortcuts';
 import { useShortcuts } from '../lib/shortcuts';
 import type { ConsoleEntry, ConsoleLevel, LocalServer, Workspace } from '../../shared/types';
 import { recentPreviewUrls } from '../lib/previewRecent';
+import { staticPreviewUrl } from '../lib/staticPreview';
 import { copyText } from '../lib/clipboard';
 import { t } from '../../shared/i18n';
 
@@ -64,12 +65,10 @@ export default function PreviewSurface({ workspace, active }: { workspace: Works
   const err = preview?.error ?? null;
   const refused = isRefused(err);
   // Static HTML preview: when the active editor tab is an .html file, the
-  // empty card offers to render it straight off disk (maestro-local protocol).
+  // empty card offers to render it straight off disk (local static server).
   const activeFile = useApp((s) => s.activeFile[wsId] ?? null);
   const htmlFile =
-    activeFile && /\.(html?|htm)$/i.test(activeFile)
-      ? `maestro-local://f/${encodeURIComponent(`${workspace.worktreePath}/${activeFile}`)}`
-      : null;
+    activeFile && /\.(html?|htm)$/i.test(activeFile) ? `${workspace.worktreePath}/${activeFile}` : null;
   // The view floats above the DOM, so it must be hidden for any DOM overlay
   // (empty/error card, annotate frame, the toolbar's overflow menu) or app
   // overlay to be visible.
@@ -314,7 +313,10 @@ export default function PreviewSurface({ workspace, active }: { workspace: Works
             onStart={startDevServer}
             onOpen={() => useApp.getState().openPreview(wsId)}
             htmlFile={htmlFile}
-            onOpenHtml={() => htmlFile && useApp.getState().openPreview(wsId, htmlFile)}
+            onOpenHtml={async () => {
+              const url = htmlFile && (await staticPreviewUrl(htmlFile));
+              if (url) useApp.getState().openPreview(wsId, url);
+            }}
           />
         )}
 

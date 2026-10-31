@@ -30,6 +30,7 @@ import {
 } from '../lib/editorBuffers';
 import { registerBufferEvictor } from '../lib/editorEvictor';
 import { parseNotebook, serializeNotebook } from '../lib/nbformat';
+import { staticPreviewUrl } from '../lib/staticPreview';
 import NotebookEditor from './NotebookEditor';
 import { ImageContextMenu } from './ImageMenu';
 import { matchesShortcut } from '../../shared/shortcuts';
@@ -455,12 +456,10 @@ export default function EditorSurface({ workspace, active }: { workspace: Worksp
             <button
               className="flex h-6 shrink-0 items-center gap-1 rounded-full bg-accent-soft px-2.5 font-medium text-accent transition-colors hover:opacity-90"
               title="在 Preview 中打开此页面（无需 dev server）"
-              onClick={() =>
-                useApp.getState().openPreview(
-                  wsId,
-                  `maestro-local://f/${encodeURIComponent(`${workspace.worktreePath}/${activeFile}`)}`
-                )
-              }
+              onClick={async () => {
+                const url = await staticPreviewUrl(`${workspace.worktreePath}/${activeFile}`);
+                if (url) useApp.getState().openPreview(wsId, url);
+              }}
             >
               <Eye size={11} /> 预览
             </button>

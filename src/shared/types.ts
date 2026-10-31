@@ -2291,6 +2291,8 @@ export interface IpcInvokeMap {
     void
   ];
   'preview:setBounds': [{ workspaceId: string; bounds: Rect }, void];
+  /** Port of the local static preview server (127.0.0.1, started at boot). */
+  'preview:staticPort': [{}, number];
   'preview:setVisible': [{ workspaceId: string; visible: boolean }, void];
   'preview:close': [{ workspaceId: string }, void];
   'preview:capture': [{ workspaceId: string; fullPage?: boolean }, PreviewShot];

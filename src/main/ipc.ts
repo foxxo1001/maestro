@@ -37,6 +37,7 @@ import {
 } from './services/harness/logins';
 import { readOAuthCreds } from './services/harness/claude';
 import { effectiveHarnessModels, refreshCodexCatalog, refreshLiveModels } from './services/harness/codex-models';
+import { staticPreviewPort } from './services/localFiles';
 import { clearFinishedTasks, workspaceBackgroundTasks } from './services/harness/tasks';
 import { installRemoteHarness, probeRemoteHarness } from './services/harness/remote';
 import { createPr, mergePr, refreshPr } from './services/pr';
@@ -528,6 +529,7 @@ function registerPreviewIpc() {
   handle('preview:navigate', ({ workspaceId, action, url }) =>
     navigatePreview(mustWorkspace(workspaceId).id, action, url)
   );
+  handle('preview:staticPort', () => staticPreviewPort());
   handle('preview:setBounds', ({ workspaceId, bounds }) => setPreviewBounds(workspaceId, bounds));
   handle('preview:setVisible', ({ workspaceId, visible }) => setPreviewVisible(workspaceId, visible));
   handle('preview:close', ({ workspaceId }) => closePreview(workspaceId));

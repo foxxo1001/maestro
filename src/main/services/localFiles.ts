@@ -1,13 +1,22 @@
 import { protocol } from 'electron';
 import { readFile } from 'node:fs/promises';
+import http from 'node:http';
+import { sep } from 'node:path';
 import { Projects, Workspaces } from '../db';
 
 /**
- * Static-file preview: `maestro-local://f/<percent-encoded absolute path>`
- * serves a file straight off disk, so the Preview tab can render a plain
- * index.html without a dev server. Standard scheme (relative subresources
- * resolve inside the same directory). Paths are validated against the
- * machine's project/workspace roots — arbitrary disk reads stay impossible.
+ * Static preview for plain HTML files.
+ *
+ * The preview pipeline (address bar, console capture, annotate) is built
+ * around http URLs, so instead of teaching it a custom scheme we run a tiny
+ * static file server bound to 127.0.0.1 on an ephemeral port:
+ *   http://127.0.0.1:<port>/f/<path segments>
+ * Only files under the machine's known project/workspace roots are served.
+ *
+ * (A `maestro-local:` standard scheme was tried first; sandboxed renderers
+ * crash on it with "preloadScripts of binding.startupData is null" in this
+ * Electron, so it is no longer used by the UI — the registration stays only
+ * as a fallback.)
  */
 
 const SCHEME = 'maestro-local';
@@ -40,7 +49,7 @@ export function registerWorkspaceProtocolScheme(): void {
   ]);
 }
 
-/** Runs after ready. */
+/** Runs after ready. Currently unused by the UI (see file comment). */
 export function registerWorkspaceProtocol(): void {
   protocol.handle(SCHEME, async (req) => {
     try {
@@ -54,6 +63,52 @@ export function registerWorkspaceProtocol(): void {
       return new Response('not found', { status: 404 });
     }
   });
+}
+
+// ---------- the http static server the Preview tab actually uses ----------
+
+let server: http.Server | null = null;
+let port = 0;
+
+/** Idempotent; called once at boot. Binds 127.0.0.1 on an ephemeral port. */
+export function startStaticPreviewServer(): void {
+  if (server) return;
+  server = http.createServer(async (req, res) => {
+    try {
+      const u = new URL(req.url ?? '/', 'http://127.0.0.1');
+      if (!u.pathname.startsWith('/f/')) {
+        res.writeHead(404);
+        res.end('not found');
+        return;
+      }
+      const p = u.pathname
+        .slice(3)
+        .split('/')
+        .map((s) => decodeURIComponent(s))
+        .filter(Boolean)
+        .join(sep);
+      if (!allowedRoot(p)) {
+        res.writeHead(403);
+        res.end('forbidden');
+        return;
+      }
+      const body = await readFile(p);
+      const ext = p.split('.').pop()?.toLowerCase() ?? '';
+      res.writeHead(200, { 'content-type': MIME[ext] ?? 'application/octet-stream' });
+      res.end(body);
+    } catch {
+      res.writeHead(404);
+      res.end('not found');
+    }
+  });
+  server.listen(0, '127.0.0.1', () => {
+    port = (server!.address() as { port: number }).port;
+    console.log('[static-preview] serving on http://127.0.0.1:' + port);
+  });
+}
+
+export function staticPreviewPort(): number {
+  return port;
 }
 
 /** Case/slash-insensitive containment check against every known root. */

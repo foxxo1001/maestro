@@ -30,7 +30,11 @@ import { disposeAllHosts } from './hosts';
 import { checkForUpdatesFromMenu, initUpdater } from './services/updater';
 import { initScheduler } from './services/schedule';
 import { initAnalytics, shutdownAnalytics } from './services/analytics';
-import { registerWorkspaceProtocol, registerWorkspaceProtocolScheme } from './services/localFiles';
+import {
+  registerWorkspaceProtocol,
+  registerWorkspaceProtocolScheme,
+  startStaticPreviewServer,
+} from './services/localFiles';
 import { MIN_LAYOUT_SIZE, TITLE_BAR_HEIGHT, ZOOM_STEP, nudgeZoom, restoreZoom, setZoom } from './services/zoom';
 
 const isSmoke = process.argv.includes('--smoke');
@@ -619,6 +623,7 @@ if (!gotLock && !isSmoke) {
     step('initUpdater', initUpdater);
     step('initAnalytics', initAnalytics);
     step('registerWorkspaceProtocol', registerWorkspaceProtocol);
+    step('startStaticPreviewServer', startStaticPreviewServer);
     // Refresh the Codex model catalog from its backend at boot (§6) — but only if
     // codex is installed; don't spawn a binary that isn't there. Throttled + silent
     // inside, so this is fire-and-forget.
