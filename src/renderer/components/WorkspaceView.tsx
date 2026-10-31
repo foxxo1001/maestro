@@ -51,8 +51,8 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
   const splitRatio = useApp((s) => s.splitRatioByWs[workspace.id] ?? 0.5);
   const splitPane = useApp((s) => s.splitPane[workspace.id] ?? 'editor');
   const activeFile = useApp((s) => s.activeFile[workspace.id] ?? null);
-  const htmlAbs =
-    activeFile && /\.(html?|htm)$/i.test(activeFile) ? `${workspace.worktreePath}/${activeFile}` : null;
+  const previewAbs =
+    activeFile && /\.(html?|htm|pdf)$/i.test(activeFile) ? `${workspace.worktreePath}/${activeFile}` : null;
   const running = useApp((s) => (s.runningAgents[workspace.id] ?? []).length > 0);
   const project = useApp((s) => s.projects.find((p) => p.id === workspace.projectId));
   const caps = useCaps(workspace.projectId);
@@ -281,8 +281,8 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
               }}
             />
             <div className="relative h-full min-w-0 flex-1">
-              {htmlAbs && splitPane === 'preview' ? (
-                <SplitHtmlPreview absPath={htmlAbs} />
+              {previewAbs && splitPane === 'preview' ? (
+                <SplitHtmlPreview absPath={previewAbs} />
               ) : (
                 <React.Suspense
                   fallback={
@@ -295,7 +295,7 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
                 </React.Suspense>
               )}
               <div className="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-full bg-raised/90 p-[3px] shadow-sm backdrop-blur">
-                {htmlAbs && (
+                {previewAbs && (
                   <>
                     <button
                       className={clsx(
