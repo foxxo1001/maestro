@@ -117,5 +117,16 @@ export async function compactChat(
   const nextSession = newSessionId ?? cmd.sessionHint;
   if (nextSession) Workspaces.setSession(workspaceId, agentId, nextSession);
   note('🧹 上下文已压缩，已从全新会话继续。以下是交接摘要：\n\n' + summary.trim());
+  // Drop the context ring right away: the fresh session carries roughly just
+  // the summary. This is an estimate — the next real turn overwrites it with
+  // the CLI's own measurement (which includes the CLI's system-prompt
+  // baseline, e.g. grok's ~68k, on top of the summary).
+  const estTokens = Math.max(1_000, Math.round(summary.trim().length / 3));
+  Workspaces.patchChat(workspaceId, agentId, {
+    contextTokens: estTokens,
+    usage: { input: estTokens, cacheRead: 0, cacheCreation: 0, output: 0 },
+  });
+  const fresh = Workspaces.get(workspaceId);
+  if (fresh) broadcast('ws:updated', fresh);
   return { ok: true };
 }
