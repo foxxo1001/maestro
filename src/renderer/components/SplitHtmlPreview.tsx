@@ -3,14 +3,16 @@ import { RotateCw } from 'lucide-react';
 import { staticPreviewUrl } from '../lib/staticPreview';
 
 /**
- * Side-pane static HTML preview: an iframe on the local static server. The
- * center Preview surface keeps its WebContentsView (console capture, annotate,
- * agent-driving); this one is deliberately plain — scripts and canvas run,
- * no chrome, instant reload.
+ * Side-pane static preview on the local server. HTML rides an iframe (scripts
+ * and canvas run); PDF rides <embed> — Chromium's PDF plugin does not render
+ * inside iframes under Electron, but does for embed/object elements. The
+ * center Preview surface keeps its WebContentsView (console capture,
+ * annotate, agent-driving).
  */
 export default function SplitHtmlPreview({ absPath }: { absPath: string }) {
   const [url, setUrl] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);
+  const isPdf = /\.pdf$/i.test(absPath);
   useEffect(() => {
     let alive = true;
     setUrl(null);
@@ -24,7 +26,11 @@ export default function SplitHtmlPreview({ absPath }: { absPath: string }) {
   return (
     <div className="absolute inset-0 bg-white">
       {url ? (
-        <iframe key={nonce} src={url} className="h-full w-full border-0" title="预览" />
+        isPdf ? (
+          <embed key={nonce} src={url} type="application/pdf" className="h-full w-full" />
+        ) : (
+          <iframe key={nonce} src={url} className="h-full w-full border-0" title="预览" />
+        )
       ) : (
         <div className="flex h-full items-center justify-center text-sm text-muted">加载中…</div>
       )}
