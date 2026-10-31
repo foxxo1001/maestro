@@ -568,22 +568,27 @@ export function parseGrokLine(line: string): AgentEvent[] {
       break;
     }
 
-    case 'usage':
-      // Mid-turn token ticks; `end` carries the authoritative usage.
+    case 'usage': {
+      // grok >=1.0.7 emits one of these per API call inside the turn. The LAST
+      // one is the conversation's actual context occupancy — the `end` usage is
+      // a cumulative sum across calls, which wildly overstates occupancy
+      // (multi-tool turns read as 600k+). `h.context` keeps the last one.
+      const u = grokUsageFrom(j.usage);
+      if (u) events.push({ kind: 'context', contextTokens: u.contextTokens, usage: u.usage });
       break;
+    }
 
     case 'end': {
-      // grok >=1.0.7 turn terminator: {stopReason, sessionId, usage}.
+      // grok >=1.0.7 turn terminator: {stopReason, sessionId, usage}. The usage
+      // here is a cumulative sum across the turn's API calls — context
+      // occupancy comes from the per-call `usage` events instead.
       const sessionId = firstStr(j.sessionId, j.session_id);
       if (sessionId) events.push({ kind: 'session', sessionId });
       const ok = !j.is_error && !j.error && !/error|abort/i.test(String(j.stopReason ?? ''));
-      const u = grokUsageFrom(j.usage);
       events.push({
         kind: 'done',
         ok,
         error: ok ? undefined : firstStr(j.error?.message, j.error, j.stopReason) ?? 'grok error',
-        contextTokens: u?.contextTokens,
-        usage: u?.usage,
       });
       break;
     }
