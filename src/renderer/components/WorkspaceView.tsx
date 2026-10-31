@@ -285,27 +285,16 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
                 window.addEventListener('mouseup', up);
               }}
             />
-            <div className="relative h-full min-w-0 flex-1">
-              {previewAbs && splitPane === 'preview' ? (
-                <SplitHtmlPreview absPath={previewAbs} />
-              ) : (
-                <React.Suspense
-                  fallback={
-                    <div className="flex h-full items-center justify-center gap-2 text-sm text-muted">
-                      <Spinner />{t("Loading editor…")} 
-                    </div>
-                  }
-                >
-                  <EditorSurface workspace={workspace} active />
-                </React.Suspense>
-              )}
-              <div className="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-full border border-border/70 bg-raised p-[3px] shadow-md">
+            <div className="flex h-full min-w-0 flex-1 flex-col">
+              {/* 实体工具条（占布局位）——悬浮控件会被 iframe/编辑器内容遮挡 */}
+              <div className="flex h-7 shrink-0 items-center gap-1.5 border-b px-2 text-2xs text-muted">
+                <span className="min-w-0 flex-1 truncate font-mono">{activeFile ?? ''}</span>
                 {previewAbs && (
                   <>
                     <button
                       className={clsx(
-                        'rounded-full px-2 py-0.5 text-2xs',
-                        splitPane === 'editor' ? 'bg-accent-soft text-fg' : 'text-muted hover:text-fg'
+                        'rounded-full px-2 py-0.5',
+                        splitPane === 'editor' ? 'bg-accent-soft text-fg' : 'hover:text-fg'
                       )}
                       onClick={() => useApp.getState().setSplitPane(workspace.id, 'editor')}
                     >
@@ -313,8 +302,8 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
                     </button>
                     <button
                       className={clsx(
-                        'rounded-full px-2 py-0.5 text-2xs',
-                        splitPane === 'preview' ? 'bg-accent-soft text-fg' : 'text-muted hover:text-fg'
+                        'rounded-full px-2 py-0.5',
+                        splitPane === 'preview' ? 'bg-accent-soft text-fg' : 'hover:text-fg'
                       )}
                       onClick={() => useApp.getState().setSplitPane(workspace.id, 'preview')}
                     >
@@ -324,12 +313,27 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
                   </>
                 )}
                 <button
-                  className="grid h-5 w-5 place-items-center rounded-full text-muted transition-colors hover:bg-accent-soft hover:text-fg"
-                  title="关闭分屏（编辑器回到全宽）"
+                  className="flex items-center gap-1 rounded-full px-2 py-0.5 hover:text-fg"
+                  title="退出分屏（对话回到全宽）"
                   onClick={() => useApp.getState().closeSplit(workspace.id)}
                 >
-                  <X size={12} />
+                  <X size={12} /> 退出分屏
                 </button>
+              </div>
+              <div className="relative min-h-0 flex-1">
+                {previewAbs && splitPane === 'preview' ? (
+                  <SplitHtmlPreview absPath={previewAbs} />
+                ) : (
+                  <React.Suspense
+                    fallback={
+                      <div className="flex h-full items-center justify-center gap-2 text-sm text-muted">
+                        <Spinner />{t("Loading editor…")} 
+                      </div>
+                    }
+                  >
+                    <EditorSurface workspace={workspace} active />
+                  </React.Suspense>
+                )}
               </div>
             </div>
           </div>
