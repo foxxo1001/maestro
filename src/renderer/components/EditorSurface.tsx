@@ -451,6 +451,20 @@ export default function EditorSurface({ workspace, active }: { workspace: Worksp
               onChange={(v) => setMdMode((p) => ({ ...p, [activeFile]: v }))}
             />
           )}
+          {/\.(html?|htm)$/i.test(activeFile) && (
+            <button
+              className="flex h-6 shrink-0 items-center gap-1 rounded-full bg-accent-soft px-2.5 font-medium text-accent transition-colors hover:opacity-90"
+              title="在 Preview 中打开此页面（无需 dev server）"
+              onClick={() =>
+                useApp.getState().openPreview(
+                  wsId,
+                  `maestro-local://f/${encodeURIComponent(`${workspace.worktreePath}/${activeFile}`)}`
+                )
+              }
+            >
+              <Eye size={11} /> 预览
+            </button>
+          )}
           <button
             className={clsx(
               'flex h-6 shrink-0 items-center gap-1 rounded-full px-2.5 font-medium transition-colors',
@@ -461,7 +475,7 @@ export default function EditorSurface({ workspace, active }: { workspace: Worksp
             onClick={() => void save(activeFile)}
           >
             <Save size={11} />{t("Save")}
-            
+
           </button>
         </div>
       )}

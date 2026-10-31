@@ -1,7 +1,7 @@
 {
   "name": "maestro",
   "productName": "Maestro",
-  "version": "0.1.84",
+  "version": "0.1.85",
   "description": "Run multiple CLI coding agents in parallel, each in an isolated git-worktree workspace.",
   "main": "dist/main/index.cjs",
   "private": true,
