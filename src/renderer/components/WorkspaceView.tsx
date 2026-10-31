@@ -227,6 +227,11 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
                 <HeaderBtn title={t("Reveal in Finder")} onClick={() => void tryInvoke('workspace:reveal', { workspaceId: workspace.id })}>
                   <FolderOpen size={13} />
                 </HeaderBtn>
+                {split && (
+                  <HeaderBtn title="退出分屏（对话回到全宽）" onClick={() => useApp.getState().closeSplit(workspace.id)}>
+                    <X size={13} />
+                  </HeaderBtn>
+                )}
               </LiquidGlass>
             </>
           )}
@@ -294,7 +299,7 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
                   <EditorSurface workspace={workspace} active />
                 </React.Suspense>
               )}
-              <div className="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-full bg-raised/90 p-[3px] shadow-sm backdrop-blur">
+              <div className="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-full border border-border/70 bg-raised p-[3px] shadow-md">
                 {previewAbs && (
                   <>
                     <button
