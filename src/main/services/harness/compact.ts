@@ -69,10 +69,14 @@ export async function compactChat(
   });
 
   // Immediate visible feedback — this flow runs outside the turn pipeline, so
-  // nothing shows up in the transcript unless we broadcast it ourselves.
+  // nothing shows up in the transcript unless we broadcast it ourselves. Every
+  // note shares ONE id: the progress card morphs in place into the success/
+  // failure card (the renderer replaces a re-broadcast id instead of appending
+  // — events.ts chat:message), so no stale spinner is left behind.
+  const progressId = uid();
   const note = (content: string, compaction: 'progress' | 'success' | 'failure') => {
     const msg = {
-      id: uid(),
+      id: progressId,
       workspaceId,
       agentId,
       role: 'system' as const,
@@ -81,6 +85,7 @@ export async function compactChat(
       ts: Date.now(),
       meta: { compaction },
     };
+    if (Messages.exists(progressId)) Messages.remove(progressId);
     Messages.insert(msg);
     broadcast('chat:message', msg);
   };
