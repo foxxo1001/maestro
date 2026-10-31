@@ -10,7 +10,7 @@ import {
 } from '../../../shared/types';
 import { localHost } from '../../hosts/local';
 import { readOAuthCreds } from './claude';
-import { grokModels } from './grok-models';
+import { grokConfigModels, grokModels } from './grok-models';
 
 /**
  * Live model catalogs for the harnesses whose backends can answer "what models
@@ -208,9 +208,12 @@ async function refreshKimi(): Promise<boolean> {
 export function grokLiveModels(): ModelOption[] {
   const live = fresh('grok');
   if (!live) return grokModels(); // built-ins + ~/.grok/config.toml custom models
-  // Live list first (login-scoped, freshest); config.toml custom models after.
+  // Live list first (login-scoped, freshest), then config.toml custom models.
+  // Static built-ins are deliberately NOT appended: they contain retired ids
+  // (grok-build-0.1) that would sit at the "weakest" slot and get picked as
+  // the compaction model.
   const seen = new Set(live.map((m) => m.id));
-  return [...live, ...grokModels().filter((m) => m.id && !seen.has(m.id))];
+  return [...live, ...grokConfigModels().filter((m) => m.id && !seen.has(m.id))];
 }
 
 async function refreshGrok(): Promise<boolean> {

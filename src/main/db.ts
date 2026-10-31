@@ -989,6 +989,8 @@ const DEFAULT_SETTINGS: GlobalSettings = {
   harnessApiKeys: {},
   autoStatus: true,
   autoDetectRunScripts: true,
+  autoCompact: true,
+  autoCompactAt: 50,
 };
 
 /**

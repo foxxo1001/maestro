@@ -275,6 +275,7 @@ function ShortcutsTab() {
 function GeneralTab() {
   const settings = useApp((s) => s.settings);
   const harnesses = useApp((s) => s.harnesses);
+  const [autoAtDraft, setAutoAtDraft] = useState<string | null>(null);
   const gpu = useApp((s) => s.gpu);
   const effects = isEffectsMode(settings.visualEffects) ? settings.visualEffects : 'auto';
   const lowEnd = lowEndReason(gpu);
@@ -438,6 +439,27 @@ function GeneralTab() {
         >
           <Toggle checked={settings.memoryGuard !== false} onChange={(v) => save({ memoryGuard: v })} />
         </SettingsRow>
+        <SettingsRow
+          label="自动压缩上下文"
+          description="占用达到阈值时，回合结束后自动生成摘要并从全新会话继续（保持前缀小而稳定，缓存命中率更高）。"
+        >
+          <Toggle checked={settings.autoCompact !== false} onChange={(v) => save({ autoCompact: v })} />
+        </SettingsRow>
+        {settings.autoCompact !== false && (
+          <SettingsRow label="自动压缩阈值（%）" description="占用达到模型窗口的此百分比时触发自动压缩。">
+            <input
+              className="input h-7 w-20 text-center font-mono"
+              value={autoAtDraft ?? String(settings.autoCompactAt ?? 50)}
+              onChange={(e) => setAutoAtDraft(e.target.value)}
+              onBlur={() => {
+                const n = Number(autoAtDraft ?? '');
+                if (Number.isFinite(n) && n >= 20 && n <= 95)
+                  void useApp.getState().saveSettings({ autoCompactAt: Math.round(n) });
+                setAutoAtDraft(null);
+              }}
+            />
+          </SettingsRow>
+        )}
         <SettingsRow
           stack
           label="模型上下文窗口覆盖"

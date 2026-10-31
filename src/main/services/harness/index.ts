@@ -426,6 +426,28 @@ async function finalize(h: RunHandle, done: DoneEvent) {
     });
   }
 
+  // Auto-compact (context hygiene à la HumanLayer / DeepSeek prefix-cache
+  // practice): when occupancy crosses the threshold, run a summary turn in a
+  // fresh session so the conversation keeps a small, cache-friendly prefix.
+  // Deferred via dynamic import — compact.ts imports this module.
+  const cfg = Settings.global();
+  if (cfg.autoCompact !== false && ctx) {
+    const at = (cfg.autoCompactAt ?? 50) / 100;
+    const wsNow = Workspaces.get(h.workspaceId);
+    if (wsNow && !isAgentRunning(h.workspaceId, h.agentId)) {
+      const modelId =
+        Workspaces.getChats(h.workspaceId)[String(h.agentId)]?.model ||
+        resolveDefaultModel(wsNow.harness, cfg.defaultModels);
+      const windowTokens =
+        effectiveHarnessModels()[wsNow.harness].find((m) => m.id === modelId)?.contextWindow ?? 200_000;
+      if (windowTokens > 0 && ctx.contextTokens / windowTokens >= at) {
+        void import('./compact')
+          .then((m) => m.compactChat(h.workspaceId, h.agentId))
+          .catch(() => {});
+      }
+    }
+  }
+
   const blocks = finalizeBlocks(h.stream);
 
   const ws = Workspaces.get(h.workspaceId);

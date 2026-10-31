@@ -54,3 +54,13 @@ function readConfig(): ModelOption[] | null {
   // relies on), custom models appended after.
   return custom.length ? [...builtins, ...custom] : null;
 }
+
+/** Just the custom `[model.*]`/`[models.*]` entries from ~/.grok/config.toml —
+ *  lets live-models append user-defined models to the live CLI list WITHOUT
+ *  dragging the static built-ins (retired ids like grok-build-0.1) along. */
+export function grokConfigModels(): ModelOption[] {
+  const all = readConfig();
+  if (!all) return [];
+  const builtinIds = new Set((HARNESS_MODELS.grok as ModelOption[]).map((m) => m.id));
+  return all.filter((m) => !builtinIds.has(m.id));
+}

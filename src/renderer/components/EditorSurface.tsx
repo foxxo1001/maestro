@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import {
   AlertTriangle,
   Check,
+  Columns2,
   Copy,
   ExternalLink,
   Eye,
@@ -63,6 +64,7 @@ export default function EditorSurface({ workspace, active }: { workspace: Worksp
   const platform = useApp((s) => s.platform);
   const openFiles = useApp((s) => s.openFiles[wsId] ?? EMPTY_ARR);
   const activeFile = useApp((s) => s.activeFile[wsId] ?? null);
+  const split = useApp((s) => s.splitEditor[wsId] ?? false);
   const dirtyMap = useApp((s) => s.dirtyFiles[wsId]) ?? EMPTY_OBJ;
   const wsVersion = useApp((s) => s.wsVersion[wsId] ?? 0);
   const theme = useApp((s) => s.resolvedTheme);
@@ -452,6 +454,16 @@ export default function EditorSurface({ workspace, active }: { workspace: Worksp
               onChange={(v) => setMdMode((p) => ({ ...p, [activeFile]: v }))}
             />
           )}
+          <button
+            className={clsx(
+              'flex h-6 shrink-0 items-center gap-1 rounded-full px-2.5 font-medium transition-colors',
+              split ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-accent-soft hover:text-fg'
+            )}
+            title={split ? '退出分屏（编辑器回到全宽）' : '分屏：左侧保留对话'}
+            onClick={() => (split ? useApp.getState().closeSplit(wsId) : useApp.getState().openSplit(wsId))}
+          >
+            <Columns2 size={11} /> {split ? '退出分屏' : '分屏'}
+          </button>
           {/\.(html?|htm)$/i.test(activeFile) && (
             <button
               className="flex h-6 shrink-0 items-center gap-1 rounded-full bg-accent-soft px-2.5 font-medium text-accent transition-colors hover:opacity-90"

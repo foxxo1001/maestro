@@ -45,6 +45,8 @@ const PreviewSurface = React.lazy(() => import('./PreviewSurface'));
 
 export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
   const tab = useApp((s) => s.tabByWs[workspace.id] ?? 'chat');
+  const split = useApp((s) => s.splitEditor[workspace.id] ?? false);
+  const splitRatio = useApp((s) => s.splitRatioByWs[workspace.id] ?? 0.5);
   const running = useApp((s) => (s.runningAgents[workspace.id] ?? []).length > 0);
   const project = useApp((s) => s.projects.find((p) => p.id === workspace.projectId));
   const caps = useCaps(workspace.projectId);
@@ -248,9 +250,47 @@ export default function WorkspaceView({ workspace }: { workspace: Workspace }) {
         className="relative min-h-0 flex-1"
         style={floatHeader ? ({ '--chrome-top': '44px' } as React.CSSProperties) : undefined}
       >
-        <div data-motion="swap" className={clsx('absolute inset-0', mode !== 'chat' && 'hidden')}>
-          <ChatPanel workspace={workspace} />
-        </div>
+        {mode === 'chat' && split ? (
+          <div className="absolute inset-0 flex">
+            <div className="relative h-full min-w-0" style={{ width: `${splitRatio * 100}%` }}>
+              <div className="absolute inset-0">
+                <ChatPanel workspace={workspace} />
+              </div>
+            </div>
+            <div
+              className="w-1 shrink-0 cursor-col-resize bg-border/40 transition-colors hover:bg-accent"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                const container = (e.currentTarget as HTMLElement).parentElement as HTMLElement;
+                const move = (ev: MouseEvent) => {
+                  const r = container.getBoundingClientRect();
+                  useApp.getState().setSplitRatio(workspace.id, (ev.clientX - r.left) / r.width);
+                };
+                const up = () => {
+                  window.removeEventListener('mousemove', move);
+                  window.removeEventListener('mouseup', up);
+                };
+                window.addEventListener('mousemove', move);
+                window.addEventListener('mouseup', up);
+              }}
+            />
+            <div className="relative h-full min-w-0 flex-1">
+              <React.Suspense
+                fallback={
+                  <div className="flex h-full items-center justify-center gap-2 text-sm text-muted">
+                    <Spinner />{t("Loading editor…")} 
+                  </div>
+                }
+              >
+                <EditorSurface workspace={workspace} active />
+              </React.Suspense>
+            </div>
+          </div>
+        ) : (
+          <div data-motion="swap" className={clsx('absolute inset-0', mode !== 'chat' && 'hidden')}>
+            <ChatPanel workspace={workspace} />
+          </div>
+        )}
         {diffVisited && (
           <div data-motion="swap" className={clsx('absolute inset-0', mode !== 'diff' && 'hidden')}>
             <DiffViewer workspace={workspace} active={mode === 'diff'} />

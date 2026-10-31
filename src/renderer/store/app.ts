@@ -309,6 +309,9 @@ export interface AppState {
   // Integrated browser (§6). Renderer-only, deliberately not persisted — the
   // computed default URL is right on restart. `undefined` = no live view.
   previewByWs: Record<string, PreviewState | undefined>;
+  /** Chat+editor split view per workspace (chat left, editor right). */
+  splitEditor: Record<string, boolean>;
+  splitRatioByWs: Record<string, number>;
   // Whether each workspace's dev-server port is listening (§5) — drives the
   // Preview tab pulse independent of whether a preview view exists.
   portUpByWs: Record<string, boolean>;
@@ -421,6 +424,10 @@ export interface AppState {
   /** Open (or focus) a worktree file in the center Editor surface, switching the
    *  center mode to 'editor'. Called by a Files-tab click instead of `fs:open`. */
   openFile: (wsId: string, path: string) => void;
+  /** Split view: chat stays on the left while the editor fills the right. */
+  openSplit: (wsId: string) => void;
+  closeSplit: (wsId: string) => void;
+  setSplitRatio: (wsId: string, r: number) => void;
   /** Close an editor tab (dirty guard is enforced at the call site). Falls back
    *  to a neighbouring tab, and leaves Editor mode when the last tab closes. */
   closeFile: (wsId: string, path: string) => void;
@@ -787,6 +794,8 @@ export const useApp = create<AppState>((set, get) => {
     editingScript: {},
     statusScope: {},
     previewByWs: {},
+    splitEditor: {},
+    splitRatioByWs: {},
     portUpByWs: {},
     annotate: null,
     composerAttachments: savedDrafts.attachments,
@@ -1082,8 +1091,16 @@ export const useApp = create<AppState>((set, get) => {
         const openFiles = list.includes(path) ? s.openFiles : { ...s.openFiles, [wsId]: [...list, path] };
         return { openFiles, activeFile: { ...s.activeFile, [wsId]: path } };
       });
-      get().setTab(wsId, 'editor');
+      // From Chat, keep the conversation visible: open the file in the right
+      // split pane instead of taking over the whole center.
+      if ((get().tabByWs[wsId] ?? 'chat') === 'chat') get().openSplit(wsId);
+      else get().setTab(wsId, 'editor');
     },
+
+    openSplit: (wsId) => set((s) => ({ splitEditor: { ...s.splitEditor, [wsId]: true } })),
+    closeSplit: (wsId) => set((s) => ({ splitEditor: { ...s.splitEditor, [wsId]: false } })),
+    setSplitRatio: (wsId, r) =>
+      set((s) => ({ splitRatioByWs: { ...s.splitRatioByWs, [wsId]: Math.min(0.75, Math.max(0.25, r)) } })),
 
     revealDiffFile: (wsId, path) => {
       set({ diffFocus: { wsId, path } });

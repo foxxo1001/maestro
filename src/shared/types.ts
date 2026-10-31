@@ -406,6 +406,10 @@ export interface GlobalSettings {
   contextWindows?: Record<string, number>;
   /** Harness groups collapsed in the composer's model menu. */
   collapsedModelGroups?: HarnessId[];
+  /** Context hygiene (HumanLayer/DeepSeek-style): auto-compact when occupancy
+   *  crosses autoCompactAt% of the window after a turn ends. */
+  autoCompact?: boolean;
+  autoCompactAt?: number;
   /** User's orchestrator + specialist stack. Per-role, per-field overrides of
    *  DEFAULT_ROLES (harness/model/effort/instructions/label/blurb), keyed by role
    *  id; also holds the full definition of each user-created role. Global across
