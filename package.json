@@ -1,7 +1,7 @@
 {
   "name": "maestro",
   "productName": "Maestro",
-  "version": "0.1.95",
+  "version": "0.1.96",
   "description": "Run multiple CLI coding agents in parallel, each in an isolated git-worktree workspace.",
   "main": "dist/main/index.cjs",
   "private": true,
@@ -160,6 +160,7 @@
     "better-sqlite3": "^12.11.1",
     "electron-updater": "^6.8.9",
     "node-pty": "^1.1.0",
+    "pdfjs-dist": "^4.10.38",
     "ssh2": "^1.17.0"
   }
 }
